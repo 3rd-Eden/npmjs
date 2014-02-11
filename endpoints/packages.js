@@ -3,7 +3,7 @@
 var debug = require('debug')('npmjs::packages')
   , normalize = require('npm-normalize')
   , licenses = require('licenses')
-  , semver = require('./semver');
+  , semver = require('../semver');
 
 /**
  * Get all package information.
