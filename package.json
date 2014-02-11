@@ -1,0 +1,36 @@
+{
+  "name": "npmjs",
+  "version": "0.0.0",
+  "description": "An alternate npm registry client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/3rd-Eden/npmjs"
+  },
+  "keywords": [
+    "npm",
+    "npmjs",
+    "registry",
+    "registry-client",
+    "npm-registry-client",
+    "npm-www",
+    "npm-ui"
+  ],
+  "author": "Arnout Kazemier",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/3rd-Eden/npmjs/issues"
+  },
+  "homepage": "https://github.com/3rd-Eden/npmjs",
+  "dependencies": {
+    "assign": "git://github.com/3rd-Eden/assign",
+    "debug": "0.7.x",
+    "licenses": "0.0.x",
+    "npm-normalize": "0.2.x",
+    "request": "2.33.x",
+    "semver": "2.2.x"
+  }
+}
