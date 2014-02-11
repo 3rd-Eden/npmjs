@@ -1,12 +1,14 @@
 'use strict';
 
-var normalize = require('npm-normalize')
-  , debug = require('debug')('npmjs')
-  , licenses = require('licenses')
+var debug = require('debug')('npmjs')
   , Assignment = require('assign')
   , request = require('request')
-  , semver = require('./semver')
   , url = require('url');
+
+//
+// Cached variables to improve performance.
+//
+var slice = Array.prototype.slice;
 
 /**
  * A simple npm registry interface for data retrieval.
@@ -18,91 +20,25 @@ var normalize = require('npm-normalize')
 function Registry(URL) {
   if (!(this instanceof Registry)) return new Registry(URL);
 
-  this.registry = URL || 'https://registry.npmjs.org/';
+  this.registry = URL || Registry.mirrors.nodejitsu;
 }
 
 /**
- * Retrieve all release specific information for the given package name.
+ * Parse the given arguments because we don't want to do an optional queue check
+ * for every single API endpoint.
  *
- * @param {String} name The package name.
- * @param {Function} fn The callback.
- * @api public
+ * @param {Arguments} args Arguments
+ * @returns {Object}
+ * @api private
  */
-Registry.prototype.releases = function releases(name, fn) {
-  return this.get(name, fn)
-  .emits(function emit(data, add) {
-    if (!data.versions) return;
+Registry.prototype.args = function parser(args) {
+  var optional = slice.call(arguments, 1);
+  args = slice.call(args, 0);
 
-    //
-    // Add all versions of the given module.
-    //
-    Object.keys(data.versions).forEach(function addmore(version) {
-      var release = data.versions[version];
-      release.date = data.time[version];
-
-      add(release);
-    });
-
-    //
-    // Also add each tag to the releases.
-    //
-    if ('dist-tags' in data) Object.keys(data['dist-tags']).forEach(function (key) {
-      var version = data['dist-tags'][key]
-        , release = JSON.parse(JSON.stringify(data.versions[version]));
-
-      //
-      // The JSON.parse(JSON.stringify)) is needed to create a full clone of the
-      // data structure as we're adding tags. That would be override during the
-      // `reduce` procedure.
-      //
-
-      release.date = data.time[version];
-      release.tag = key;
-
-      add(release);
-    });
-
-    return false;
-  }).map(function map(release) {
-    return {
-        tag: release.tag || ''
-      , name: release.name || ''
-      , date: release.date || '1970-01-01T00:00:00.000Z'
-      , version: release.version || '0.0.0'
-      , license: licenses(release)
-      , shasum: release.dist.shasum || ''
-      , dependencies: release.dependencies || {}
-      , devDependencies: release.devDependencies || {}
-      , peerDependencies: release.peerDependencies || {}
-    };
-  }).reduce(function reduce(memo, release) {
-      memo[release.tag || release.version] = release;
-      return memo;
-  }, {});
-};
-
-/**
- * Get a version for a specific release.
- *
- * @param {String} name The name of the package.
- * @param {String} version The version number we should retrieve.
- * @param {Function} fn The callback.
- * @api public
- */
-Registry.prototype.release = function release(name, range, fn) {
-  return this.releases(name, function releases(err, versions) {
-    if (err) return fn(err);
-
-    if (range in versions) {
-      debug('found and direct range (%s) match for %s', range, name);
-      return fn(undefined, versions[range]);
-    }
-
-    var version = semver.maxSatisfying(Object.keys(versions), range);
-
-    debug('max satisfying version for %s is %s', name, version);
-    fn(undefined, versions[version]);
-  });
+  return optional.reduce(function optional(data, key, index) {
+    data[key] = args[index];
+    return data;
+  }, { value: args.shift(), fn: args.pop() });
 };
 
 /**
@@ -112,30 +48,7 @@ Registry.prototype.release = function release(name, range, fn) {
  * @param {Function} fn The callback.
  * @api private
  */
-Registry.prototype.get = function get(name, fn) {
-  return this.request(name, fn)
-  .map(function map(data) {
-    return normalize(data || {});
-  })
-  .async
-  .map(function map(data, next) {
-    licenses(data, function parsed(err, licenses) {
-      if (err) return next(err);
-
-      data.licenses = licenses;
-      next(undefined, data);
-    });
-  });
-};
-
-/**
- * Retrieve something from the CouchDB registry.
- *
- * @param {String} pathname The path.
- * @param {Function} fn The callback.
- * @api private
- */
-Registry.prototype.request = function requesting(pathname, fn) {
+Registry.prototype.send = function requesting(pathname, fn) {
   var location = url.resolve(this.registry, pathname)
     , assign = new Assignment(this, fn);
 
@@ -178,6 +91,54 @@ Registry.prototype.request = function requesting(pathname, fn) {
   });
 
   return assign;
+};
+
+/**
+ * Define an lazy loading API.
+ *
+ * @param {Object} where Where should we define the property
+ * @param {String} name The name of the property
+ * @param {Function} fn The function that returns the new value
+ * @api private
+ */
+Registry.define = function define(where, name, fn) {
+  Object.defineProperty(where, name, {
+    configurable: true,
+    get: function get() {
+      return Object.defineProperty(this, name, {
+        value: fn.call(this)
+      })[name];
+    },
+    set: function set(value) {
+      return Object.defineProperty(this, name, {
+        value: value
+      })[name];
+    }
+  });
+};
+
+//
+// Lazy load the various of endpoints so they only get initialized when we
+// actually need them.
+//
+Registry.define(Registry.prototype, 'packages', function define() {
+  return new Registry.Packages(this);
+});
+
+//
+// Expose API end points
+//
+Registry.Packages = require('./endpoints/packages');
+
+//
+// Expose list of public endpoints that people can use to connect.
+//
+Registry.mirrors = {
+  nodejitsu:  'http://registry.nodejitsu.com/',
+  strongloop: 'http://npm.strongloop.com/',
+  npmjsau:    'http://registry.npmjs.org.au/',
+  npmjseu:    'http://registry.npmjs.eu/',
+  npmjs:      'http://registry.npmjs.org/'
 };
 
 //
