@@ -174,7 +174,7 @@ Registry.prototype.request = function requesting(pathname, fn) {
       return;
     }
 
-    assign.write(data, true);
+    assign.write(data, { end: true });
   });
 
   return assign;
