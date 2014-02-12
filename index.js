@@ -8,7 +8,8 @@ var debug = require('debug')('npmjs')
 //
 // Cached variables to improve performance.
 //
-var slice = Array.prototype.slice;
+var toString = Object.prototype.toString
+  , slice = Array.prototype.slice;
 
 /**
  * A simple npm registry interface for data retrieval.
@@ -27,18 +28,28 @@ function Registry(URL) {
  * Parse the given arguments because we don't want to do an optional queue check
  * for every single API endpoint.
  *
- * @param {Arguments} args Arguments
- * @returns {Object}
+ * @param {Arguments} args Arguments.
+ * @returns {Object} type => based object.
  * @api private
  */
 Registry.prototype.args = function parser(args) {
-  var optional = slice.call(arguments, 1);
-  args = slice.call(args, 0);
+  var registry = this;
 
-  return optional.reduce(function optional(data, key, index) {
-    data[key] = args[index];
+  return slice.call(args, 0).reduce(function parse(data, value) {
+    data[registry.type(value)] = value;
     return data;
-  }, { value: args.shift(), fn: args.pop() });
+  }, {});
+};
+
+/**
+ * Get accurate type information for the given JavaScript class.
+ *
+ * @param {Mixed} of The thing who's type class we want to figure out.
+ * @returns {String} lowercase variant of the name
+ * @api private
+ */
+Registry.prototype.type = function type(of) {
+  return toString.call(of).slice(8, -1).toLowerCase();
 };
 
 /**
@@ -48,23 +59,27 @@ Registry.prototype.args = function parser(args) {
  * @param {Function} fn The callback.
  * @api private
  */
-Registry.prototype.send = function requesting(pathname, fn) {
-  var location = url.resolve(this.registry, pathname)
-    , assign = new Assignment(this, fn);
+Registry.prototype.send = function requesting(args) {
+  args = this.args(arguments);
 
-  debug('getting url: %s', location);
+  var location = url.resolve(this.registry, args.string)
+    , assign = new Assignment(this, args.function)
+    , options = args.object || {};
 
-  request({
-    method: 'GET',
-    strictSSL: false,
-    uri: location
-  }, function received(err, res, body) {
+  options.uri = 'uri' in options ? options.uri : location;
+  options.method = 'method' in options ? options.method : 'GET';
+  options.strictSSL = 'strictSSL' in options ? options.strictSSL : false;
+
+  debug('getting url: %s', options.uri);
+
+  request(options, function received(err, res, body) {
     if (err) return assign.destroy(err);
     if (res.statusCode !== 200) {
       err = new Error([
         'Received an invalid status code',
         res.statusCode,
-        ''
+        'when requesting URL',
+        location
       ].join(' '));
 
       err.statusCode = res.statusCode;  // Reference to the status code.
@@ -78,13 +93,15 @@ Registry.prototype.send = function requesting(pathname, fn) {
     // In this case I prefer to manually parse the JSON response as it allows us
     // to return more readable error messages.
     //
-    var data;
-    try { data = JSON.parse(body); }
-    catch (e) {
-      err = new Error('Failed to parse the JSON response: '+ e.message);
-      debug(err.message);
-      assign.destroy(err);
-      return;
+    var data = body;
+
+    if ('string' === typeof data) {
+      try { data = JSON.parse(body); }
+      catch (e) {
+        err = new Error('Failed to parse the JSON response: '+ e.message);
+        debug(err.message);
+        return assign.destroy(err);
+      }
     }
 
     assign.write(data, { end: true });
@@ -121,24 +138,29 @@ Registry.define = function define(where, name, fn) {
 // Lazy load the various of endpoints so they only get initialized when we
 // actually need them.
 //
-Registry.define(Registry.prototype, 'packages', function define() {
+Registry.define(Registry.prototype, 'packages', function defined() {
   return new Registry.Packages(this);
 });
 
+Registry.define(Registry.prototype, 'user', function defined() {
+  return new Registry.User(this);
+});
+
 //
-// Expose API end points
+// Expose API end points.
 //
 Registry.Packages = require('./endpoints/packages');
+Registry.User     = require('./endpoints/user');
 
 //
 // Expose list of public endpoints that people can use to connect.
 //
 Registry.mirrors = {
-  nodejitsu:  'http://registry.nodejitsu.com/',
-  strongloop: 'http://npm.strongloop.com/',
-  npmjsau:    'http://registry.npmjs.org.au/',
-  npmjseu:    'http://registry.npmjs.eu/',
-  npmjs:      'http://registry.npmjs.org/'
+  nodejitsu:    'http://registry.nodejitsu.com/',
+  strongloop:   'http://npm.strongloop.com/',
+  npmjsau:      'http://registry.npmjs.org.au/',
+  npmjseu:      'http://registry.npmjs.eu/',
+  npmjs:        'http://registry.npmjs.org/'
 };
 
 //
