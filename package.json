@@ -31,6 +31,7 @@
     "licenses": "0.0.x",
     "npm-normalize": "0.2.x",
     "request": "2.33.x",
-    "semver": "2.2.x"
+    "semver": "2.2.x",
+    "back": "~0.1.5"
   }
 }

@@ -3,6 +3,7 @@
 var debug = require('debug')('npmjs')
   , Assignment = require('assign')
   , request = require('request')
+  , back = require('back')
   , url = require('url');
 
 //
@@ -14,14 +15,49 @@ var toString = Object.prototype.toString
 /**
  * A simple npm registry interface for data retrieval.
  *
+ * The following options are accepted:
+ *
+ * - registry: Registry URL we want to connect to.
+ * - user: Name of the account.
+ * - password: Password of the account.
+ * - mirrors: Alternate mirrors we should use when we receive an error.
+ * - factor: Backoff factor.
+ * - mindelay: Minimum backoff delay.
+ * - maxdelay: Maximum backoff delay.
+ * - retries: Maximum amount of retries.
+ *
  * @constructor
- * @param {String} URL The URL of the npm registry.
+ * @param {Object} options Configuration
  * @api public
  */
-function Registry(URL) {
-  if (!(this instanceof Registry)) return new Registry(URL);
+function Registry(options) {
+  if (!(this instanceof Registry)) return new Registry(options);
 
-  this.registry = URL || Registry.mirrors.nodejitsu;
+  options = options || {};
+
+  options.registry = 'registry' in options ? options.registry : Registry.mirrors.nodejitsu;
+  options.mirrors = 'mirrors' in options ? options.mirros : Object.keys(Registry.mirrors);
+  options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
+  options.mindelay = 'mindelay' in options ? options.mindelay : 100;
+  options.factor = 'factor' in options ? options.factor : 2;
+
+  this.mirrors = options.mirrors;
+  this.registry = options.registry;
+  this.mindelay = options.mindelay;
+  this.maxdelay = options.maxdelay;
+  this.retries = options.retries;
+  this.factor = options.factor;
+  this.authorization = undefined;
+
+  //
+  // Pre-compile the basic authorization so we can do updates and deletes
+  // against the registries.
+  //
+  if (options.user && options.password) {
+    this.authorization = 'Basic '+ new Buffer(
+      options.user +':'+ options.password
+    ).toString('base64');
+  }
 }
 
 /**
@@ -69,10 +105,49 @@ Registry.prototype.send = function requesting(args) {
   options.uri = 'uri' in options ? options.uri : location;
   options.method = 'method' in options ? options.method : 'GET';
   options.strictSSL = 'strictSSL' in options ? options.strictSSL : false;
+  options.headers = 'headers' in options ? options.headers : {};
+  options.backoff = {
+    retries: 'retries' in options ? options.retires : this.retries,
+    minDelay: 'mindelay' in options ? options.mindelay : this.mindelay,
+    maxDelay: 'maxdelay' in options ? options.maxdelay : this.maxdelay,
+    factor: 'factor' in options ? options.factor : this.factor
+  };
+
+  //
+  // Add some extra HTTP headers so it would be easier to get a normal response
+  // from the server.
+  //
+  [
+    {
+      key: 'User-Agent',
+      value: 'npmjs/'+ this.version + ' node/'+ process.version
+    }, {
+      key: 'Authorization',
+      value: this.authorization
+    }, {
+      key: 'Accept',
+      value: 'application/json'
+    }
+  ].forEach(function each(header) {
+    if (
+         header.key in options.headers                // Already defined.
+      || header.key.toLowerCase() in options.headers  // Alternate.
+      || !header.value                                // No value, ignore this.
+    ) return;
+
+    options.headers[header.key] = header.value;
+  });
 
   debug('getting url: %s', options.uri);
 
-  request(options, function received(err, res, body) {
+  /**
+   *
+   * @param {Error} err Optional error argument.
+   * @param {Object} res HTTP response object.
+   * @param {String} body The registry response.
+   * @api private
+   */
+  function parse(err, res, body) {
     if (err) return assign.destroy(err);
     if (res.statusCode !== 200) {
       err = new Error([
@@ -105,9 +180,19 @@ Registry.prototype.send = function requesting(args) {
     }
 
     assign.write(data, { end: true });
-  });
+  }
 
+  request(options, parse);
   return assign;
+};
+
+/**
+ *
+ */
+Registry.prototype.view = function view(args) {
+  args = this.args(arguments);
+
+  return this.request();
 };
 
 /**
@@ -142,15 +227,15 @@ Registry.define(Registry.prototype, 'packages', function defined() {
   return new Registry.Packages(this);
 });
 
-Registry.define(Registry.prototype, 'user', function defined() {
-  return new Registry.User(this);
+Registry.define(Registry.prototype, 'users', function defined() {
+  return new Registry.Users(this);
 });
 
 //
 // Expose API end points.
 //
 Registry.Packages = require('./endpoints/packages');
-Registry.User     = require('./endpoints/user');
+Registry.Users    = require('./endpoints/users');
 
 //
 // Expose list of public endpoints that people can use to connect.

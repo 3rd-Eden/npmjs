@@ -3,11 +3,13 @@
 var normalize = require('npm-normalize');
 
 /**
+ * Access users based request information.
+ *
  * @constructor
  * @param {Registry} api Reference to the wrapping registry.
  * @api private
  */
-function User(api) {
+function Users(api) {
   this.api = api;
   this.send = api.send.bind(api);
 }
@@ -20,7 +22,7 @@ function User(api) {
  * @param {Function} fn The callback.
  * @api public
  */
-User.prototype.add = function add(name, pkg, fn) {
+Users.prototype.add = function add(name, pkg, fn) {
 
 };
 
@@ -31,7 +33,7 @@ User.prototype.add = function add(name, pkg, fn) {
  * @param {Function} fn The callback.
  * @api public
  */
-User.prototype.list = function list(name, fn) {
+Users.prototype.list = function list(name, fn) {
   return this.send();
 };
 
@@ -42,7 +44,7 @@ User.prototype.list = function list(name, fn) {
  * @param {Function} fn The callback.
  * @api public
  */
-User.prototype.get = function get(name, fn) {
+Users.prototype.get = function get(name, fn) {
   name = '/-/user/org.couchdb.user:'+ name;
   return this.send(name, fn).map(function map(data) {
     // @TODO github parsing
@@ -63,7 +65,7 @@ User.prototype.get = function get(name, fn) {
  * @param {Object} options Configuration of the sync process.
  * @api public
  */
-User.prototype.sync = function sync(source, target, options, fn) {
+Users.prototype.sync = function sync(source, target, options, fn) {
   if ('function' === typeof options) {
     fn = options;
     options = null;
