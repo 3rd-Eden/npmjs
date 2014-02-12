@@ -41,19 +41,19 @@ function Registry(options) {
   options.mindelay = 'mindelay' in options ? options.mindelay : 100;
   options.factor = 'factor' in options ? options.factor : 2;
 
+  this.authorization = options.authorization;
   this.mirrors = options.mirrors;
   this.registry = options.registry;
   this.mindelay = options.mindelay;
   this.maxdelay = options.maxdelay;
   this.retries = options.retries;
   this.factor = options.factor;
-  this.authorization = undefined;
 
   //
   // Pre-compile the basic authorization so we can do updates and deletes
   // against the registries.
   //
-  if (options.user && options.password) {
+  if (!this.authorization && options.user && options.password) {
     this.authorization = 'Basic '+ new Buffer(
       options.user +':'+ options.password
     ).toString('base64');
