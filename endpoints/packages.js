@@ -9,7 +9,7 @@ var debug = require('debug')('npmjs::packages')
  * Get all package information.
  *
  * @constructor
- * @param {Registry} api
+ * @param {Registry} api Reference to the wrapping registry.
  * @api private
  */
 function Packages(api) {
