@@ -69,15 +69,16 @@ function Registry(options) {
  * @api private
  */
 Registry.prototype.args = function parser(args) {
-  var alias = {
-    'function': 'fn',       // My preferred callback name.
-    'object':   'options',  // Objects are usually options.
-    'string':   'str',      // Shorter to write.
-    'number':   'nr'        // ditto.
-  };
+  var registry = this
+    , alias = {
+        'function': 'fn',       // My preferred callback name.
+        'object':   'options',  // Objects are usually options.
+        'string':   'str',      // Shorter to write.
+        'number':   'nr'        // ditto.
+      };
 
   return slice.call(args, 0).reduce(function parse(data, value) {
-    var type = this.type(value);
+    var type = registry.type(value);
     data[type] = value;
 
     if (type in alias) {
@@ -85,7 +86,7 @@ Registry.prototype.args = function parser(args) {
     }
 
     return data;
-  }, {}, this);
+  }, {});
 };
 
 /**
@@ -153,7 +154,7 @@ Registry.prototype.send = function send(args) {
     // As the registry root can change per request we need to set this option
     // during our downgrading process to ensure we hit the correct URL.
     //
-    options.uri = 'uri' in options ? options.uri : url.resolve(root, args.path);
+    options.uri = 'uri' in options ? options.uri : url.resolve(root, args.str);
 
     /**
      * Handle the requests.
