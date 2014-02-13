@@ -47,6 +47,7 @@ function Registry(options) {
   options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
   options.mindelay = 'mindelay' in options ? options.mindelay : 100;
   options.factor = 'factor' in options ? options.factor : 2;
+  options.retries = 'retries' in options ? options.retries : 3;
 
   this.authorization = options.authorization;
   this.mirrors = options.mirrors;
@@ -117,7 +118,7 @@ Registry.prototype.type = function type(of) {
 Registry.prototype.send = function send(args) {
   args = this.args(arguments);
 
-  var mirrors = [ this.registry ].concat(this.mirrors)
+  var mirrors = [ this.registry ].concat(this.mirrors || [])
     , assign = new Assignment(this, args.fn)
     , options = args.options || {};
 
@@ -204,6 +205,7 @@ Registry.prototype.send = function send(args) {
     back(function toTheFuture(err, backoff) {
       options.backoff = backoff;
 
+      debug('Starting request again after back off attempt %s/%s', backoff.attempt, backoff.retries);
       if (!err) return request(options, parse);
 
       //
