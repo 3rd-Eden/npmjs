@@ -35,8 +35,15 @@ function Registry(options) {
 
   options = options || {};
 
+  //
+  // Get an array of active npm mirrors.
+  //
+  var mirrors = Object.keys(Registry.mirrors).map(function map(mirror) {
+    return Registry.mirrors[mirror];
+  });
+
   options.registry = 'registry' in options ? options.registry : Registry.mirrors.nodejitsu;
-  options.mirrors = 'mirrors' in options ? options.mirrors : Object.keys(Registry.mirrors);
+  options.mirrors = 'mirrors' in options ? options.mirrors : mirrors;
   options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
   options.mindelay = 'mindelay' in options ? options.mindelay : 100;
   options.factor = 'factor' in options ? options.factor : 2;
@@ -150,11 +157,7 @@ Registry.prototype.send = function send(args) {
   });
 
   this.downgrade(mirrors, function downgraded(err, root, next) {
-    //
-    // As the registry root can change per request we need to set this option
-    // during our downgrading process to ensure we hit the correct URL.
-    //
-    options.uri = 'uri' in options ? options.uri : url.resolve(root, args.str);
+    options.uri = url.resolve(root, args.str);
 
     /**
      * Handle the requests.
@@ -165,11 +168,11 @@ Registry.prototype.send = function send(args) {
      * @api private
      */
     function parse(err, res, body) {
-      if (err || res.statusCode !== 200) {
+      if (err || !res || res.statusCode !== 200) {
         if (err) err = err.message;
         else err = 'Received an invalid status code %s when requesting URL %s';
 
-        debug(err, res.statusCode, options.uri);
+        debug(err, res ? res.statusCode : '', options.uri);
         return next();
       }
 
