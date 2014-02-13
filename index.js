@@ -36,7 +36,7 @@ function Registry(options) {
   options = options || {};
 
   options.registry = 'registry' in options ? options.registry : Registry.mirrors.nodejitsu;
-  options.mirrors = 'mirrors' in options ? options.mirros : Object.keys(Registry.mirrors);
+  options.mirrors = 'mirrors' in options ? options.mirrors : Object.keys(Registry.mirrors);
   options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
   options.mindelay = 'mindelay' in options ? options.mindelay : 100;
   options.factor = 'factor' in options ? options.factor : 2;
@@ -69,12 +69,23 @@ function Registry(options) {
  * @api private
  */
 Registry.prototype.args = function parser(args) {
-  var registry = this;
+  var alias = {
+    'function': 'fn',       // My preferred callback name.
+    'object':   'options',  // Objects are usually options.
+    'string':   'str',      // Shorter to write.
+    'number':   'nr'        // ditto.
+  };
 
   return slice.call(args, 0).reduce(function parse(data, value) {
-    data[registry.type(value)] = value;
+    var type = this.type(value);
+    data[type] = value;
+
+    if (type in alias) {
+      data[alias[type]] = data[type];
+    }
+
     return data;
-  }, {});
+  }, {}, this);
 };
 
 /**
@@ -91,18 +102,17 @@ Registry.prototype.type = function type(of) {
 /**
  * Retrieve something from the CouchDB registry.
  *
- * @param {String} pathname The path.
- * @param {Function} fn The callback.
- * @api private
+ * @param {Arguments} args
+ * @returns {Assign}
+ * @api public
  */
-Registry.prototype.send = function requesting(args) {
+Registry.prototype.send = function send(args) {
   args = this.args(arguments);
 
-  var location = url.resolve(this.registry, args.string)
-    , assign = new Assignment(this, args.function)
-    , options = args.object || {};
+  var mirrors = [ this.registry ].concat(this.mirrors)
+    , assign = new Assignment(this, args.fn)
+    , options = args.options || {};
 
-  options.uri = 'uri' in options ? options.uri : location;
   options.method = 'method' in options ? options.method : 'GET';
   options.strictSSL = 'strictSSL' in options ? options.strictSSL : false;
   options.headers = 'headers' in options ? options.headers : {};
@@ -138,61 +148,122 @@ Registry.prototype.send = function requesting(args) {
     options.headers[header.key] = header.value;
   });
 
-  debug('getting url: %s', options.uri);
-
-  /**
-   *
-   * @param {Error} err Optional error argument.
-   * @param {Object} res HTTP response object.
-   * @param {String} body The registry response.
-   * @api private
-   */
-  function parse(err, res, body) {
-    if (err) return assign.destroy(err);
-    if (res.statusCode !== 200) {
-      err = new Error([
-        'Received an invalid status code',
-        res.statusCode,
-        'when requesting URL',
-        location
-      ].join(' '));
-
-      err.statusCode = res.statusCode;  // Reference to the status code.
-      err.url = location;               // The URL location.
-
-      debug(err.message);
-      return assign.destroy(err);
-    }
-
+  this.downgrade(mirrors, function downgraded(err, root, next) {
     //
-    // In this case I prefer to manually parse the JSON response as it allows us
-    // to return more readable error messages.
+    // As the registry root can change per request we need to set this option
+    // during our downgrading process to ensure we hit the correct URL.
     //
-    var data = body;
+    options.uri = 'uri' in options ? options.uri : url.resolve(root, args.path);
 
-    if ('string' === typeof data) {
-      try { data = JSON.parse(body); }
-      catch (e) {
-        err = new Error('Failed to parse the JSON response: '+ e.message);
-        debug(err.message);
-        return assign.destroy(err);
+    /**
+     * Handle the requests.
+     *
+     * @param {Error} err Optional error argument.
+     * @param {Object} res HTTP response object.
+     * @param {String} body The registry response.
+     * @api private
+     */
+    function parse(err, res, body) {
+      if (err || res.statusCode !== 200) {
+        if (err) err = err.message;
+        else err = 'Received an invalid status code %s when requesting URL %s';
+
+        debug(err, res.statusCode, options.uri);
+        return next();
       }
+
+      //
+      // In this case I prefer to manually parse the JSON response as it allows us
+      // to return more readable error messages.
+      //
+      var data = body;
+
+      if ('string' === typeof data) {
+        try { data = JSON.parse(body); }
+        catch (e) {
+          debug('Failed to parse JSON: %s', err.message);
+          return next();
+        }
+      }
+
+      assign.write(data, { end: true });
     }
 
-    assign.write(data, { end: true });
-  }
+    //
+    // The error indicates that we've ran out of mirrors, so we should try
+    // a backoff operation against the default npm registry, which is provided
+    // by the callback. If the backoff fails, we should completely give up and
+    // return an useful error back to the client.
+    //
+    if (!err) return request(options, parse);
 
-  request(options, parse);
+    back(function toTheFuture(err, backoff) {
+      options.backoff = backoff;
+
+      if (!err) return request(options, parse);
+
+      //
+      // Okay, we can assume that shit is seriously wrong here.
+      //
+      return assign.destroy(new Error('Failed to process request'));
+    }, options.backoff);
+  });
+
   return assign;
 };
 
 /**
+ * Downgrade the list of given npm mirrors so we can query against a different
+ * server when our default registry is down.
  *
+ * @param {Array} mirrors The list of npm registry mirrors we can query against.
+ * @param {Function} fn The callback.
+ * @api private
+ */
+Registry.prototype.downgrade = function downgrade(mirrors, fn) {
+  var registry = this;
+
+  //
+  // Remove duplicates as we don't want to test against the same server twice as
+  // we already received an error. An instant retry isn't that useful in most
+  // cases as we should give the server some time to cool down.
+  //
+  mirrors = mirrors.filter(function dedupe(item, i, all) {
+    if (!item) return false; // Removes undefined, null and other garbage.
+    return all.indexOf(item) === i;
+  });
+
+  (function recursive() {
+    var reg = mirrors.shift();
+
+    //
+    // We got a valid registry that we can query against.
+    //
+    if (reg) return fn(undefined, reg, recursive);
+
+    //
+    // No registries available, the callback should start an back off operation
+    // against the default provided npm registry.
+    //
+    fn(
+      new Error('No npm registries available, everything seems down.'),
+      registry.registry,
+      recursive
+    );
+  }());
+
+  return this;
+};
+
+/**
+ * Retrieve data from a CouchDB view.
+ *
+ * @returns {Assign}
  */
 Registry.prototype.view = function view(args) {
   args = this.args(arguments);
 
-  return this.request();
+  return this.send(args.fn);
 };
 
 /**
