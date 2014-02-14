@@ -49,8 +49,8 @@ var Registry = mana.extend({
     options.mirrors = 'mirrors' in options ? options.mirrors : mirrors;
     options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
     options.mindelay = 'mindelay' in options ? options.mindelay : 100;
-    options.factor = 'factor' in options ? options.factor : 2;
     options.retries = 'retries' in options ? options.retries : 3;
+    options.factor = 'factor' in options ? options.factor : 2;
 
     this.authorization = options.authorization;
     this.mirrors = options.mirrors;
@@ -65,6 +65,7 @@ var Registry = mana.extend({
     // against the registries.
     //
     if (!this.authorization && options.user && options.password) {
+      debug('received authorization information for %s', options.user);
       this.authorization = 'Basic '+ new Buffer(
         options.user +':'+ options.password
       ).toString('base64');
