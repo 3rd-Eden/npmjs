@@ -26,12 +26,10 @@
   },
   "homepage": "https://github.com/3rd-Eden/npmjs",
   "dependencies": {
-    "assign": "git://github.com/3rd-Eden/assign",
     "debug": "0.7.x",
     "licenses": "0.0.x",
     "npm-normalize": "0.2.x",
-    "request": "2.33.x",
     "semver": "2.2.x",
-    "back": "~0.1.5"
+    "mana": "0.0.x"
   }
 }
