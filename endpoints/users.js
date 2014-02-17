@@ -12,6 +12,7 @@ var normalize = require('npm-normalize');
 function Users(api) {
   this.api = api;
   this.send = api.send.bind(api);
+  this.view = api.view.bind(api);
 }
 
 /**
@@ -20,21 +21,42 @@ function Users(api) {
  * @param {String} name The user's name who needs to own the package.
  * @param {String} pkg The module it should become an owner off.
  * @param {Function} fn The callback.
+ * @returns {Assign}
  * @api public
  */
 Users.prototype.add = function add(name, pkg, fn) {
-
+  return this.send(name, {
+    method: 'PUT',
+    json: {}
+  }, fn);
 };
 
 /**
  * List all packages for the given name.
  *
- * @param {String} name The user's name who's packages we want to list
+ * @param {String} name The user's name who's packages we want to list.
  * @param {Function} fn The callback.
+ * @returns {Assign}
  * @api public
  */
 Users.prototype.list = function list(name, fn) {
-  return this.send();
+  return this.view('browseAuthors', {
+    key: name
+  }, fn);
+};
+
+/**
+ * List all packages that the user has starred.
+ *
+ * @param {String} name The user's name
+ * @param {Function} fn The callback.
+ * @returns {Assign}
+ * @api public
+ */
+Users.prototype.starred = function starred(name, fn) {
+  return this.view('browseStarUser', {
+    key: name
+  });
 };
 
 /**
@@ -42,17 +64,13 @@ Users.prototype.list = function list(name, fn) {
  *
  * @param {String} name The user's name.
  * @param {Function} fn The callback.
+ * @returns {Assign}
  * @api public
  */
 Users.prototype.get = function get(name, fn) {
   name = '/-/user/org.couchdb.user:'+ name;
-  return this.send(name, fn).map(function map(data) {
-    // @TODO github parsing
-    // @TODO twitter normalization
-    // @TODO email clean up
-    // @TODO get all users packages
-    return normalize(data || {});
-  });
+
+  return this.send(name, fn);
 };
 
 /**
@@ -83,3 +101,8 @@ Users.prototype.sync = function sync(source, target, options, fn) {
     }, fn);
   });
 };
+
+//
+// Expose module.
+//
+module.exports = Users;

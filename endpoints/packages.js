@@ -14,7 +14,9 @@ var debug = require('debug')('npmjs::packages')
  */
 function Packages(api) {
   this.api = api;
+
   this.send = api.send.bind(api);
+  this.view = api.view.bind(api);
 }
 
 /**
@@ -29,6 +31,34 @@ Packages.prototype.get = function get(name, fn) {
   return this.send(name, fn).map(function map(data) {
     return normalize(data || {});
   });
+};
+
+/**
+ * Get all packages that are depended upon a given package name.
+ *
+ * @param {String} name The name of the node module.
+ * @param {Function} fn The callback
+ * @returns {Assign}
+ * @api public
+ */
+Packages.prototype.dependend = function dependend(name, fn) {
+  return this.view('dependedUpon', {
+    key: name
+  }, fn);
+};
+
+/**
+ * Find out which users have starred the given package.
+ *
+ * @param {String} name The name of the node module.
+ * @param {Function} fn The callback
+ * @returns {Assign}
+ * @api public
+ */
+Packages.prototype.starred = function starred(name, fn) {
+  return this.view('browseStarPackage', {
+    key: name
+  }, fn);
 };
 
 /**
