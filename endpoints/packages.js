@@ -41,10 +41,10 @@ Packages.prototype.get = function get(name, fn) {
  * @returns {Assign}
  * @api public
  */
-Packages.prototype.dependend = function dependend(name, fn) {
+Packages.prototype.depended = function depended(name, fn) {
   return this.view('dependedUpon', {
     key: name
-  }, fn);
+  }, fn).map(this.api.map.simple);
 };
 
 /**
@@ -58,7 +58,9 @@ Packages.prototype.dependend = function dependend(name, fn) {
 Packages.prototype.starred = function starred(name, fn) {
   return this.view('browseStarPackage', {
     key: name
-  }, fn);
+  }, fn).map(function map(data) {
+    return data[2];
+  });
 };
 
 /**

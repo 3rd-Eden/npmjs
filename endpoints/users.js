@@ -42,7 +42,7 @@ Users.prototype.add = function add(name, pkg, fn) {
 Users.prototype.list = function list(name, fn) {
   return this.view('browseAuthors', {
     key: name
-  }, fn);
+  }, fn).map(this.api.map.simple);
 };
 
 /**
@@ -56,7 +56,7 @@ Users.prototype.list = function list(name, fn) {
 Users.prototype.starred = function starred(name, fn) {
   return this.view('browseStarUser', {
     key: name
-  });
+  }, fn).map(this.api.map.simple);
 };
 
 /**
