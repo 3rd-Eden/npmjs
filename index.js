@@ -70,6 +70,21 @@ var Registry = mana.extend({
         options.user +':'+ options.password
       ).toString('base64');
     }
+  },
+
+  /**
+   * Common map operations that can be shared between the different endpoints.
+   *
+   * @type {Object}
+   * @private
+   */
+  map: {
+    simple: function simple(data) {
+      return {
+        name: data[1],
+        description: data[2]
+      };
+    }
   }
 }).drink(module);
 
