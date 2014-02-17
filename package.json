@@ -28,7 +28,6 @@
   "dependencies": {
     "debug": "0.7.x",
     "licenses": "0.0.x",
-    "npm-normalize": "0.2.x",
     "semver": "2.2.x",
     "mana": "0.1.x"
   }

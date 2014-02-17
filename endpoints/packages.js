@@ -1,7 +1,7 @@
 'use strict';
 
 var debug = require('debug')('npmjs::packages')
-  , normalize = require('npm-normalize')
+  , normalize = require('../normalize')
   , licenses = require('licenses')
   , semver = require('../semver');
 
@@ -28,9 +28,7 @@ function Packages(api) {
  * @api public
  */
 Packages.prototype.get = function get(name, fn) {
-  return this.send(name, fn).map(function map(data) {
-    return normalize(data || {});
-  });
+  return this.send(name, fn).map(normalize);
 };
 
 /**

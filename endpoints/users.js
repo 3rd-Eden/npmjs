@@ -1,6 +1,6 @@
 'use strict';
 
-var normalize = require('npm-normalize');
+var normalize = require('../normalize');
 
 /**
  * Access users based request information.
@@ -70,7 +70,7 @@ Users.prototype.starred = function starred(name, fn) {
 Users.prototype.get = function get(name, fn) {
   name = '/-/user/org.couchdb.user:'+ name;
 
-  return this.send(name, fn);
+  return this.send(name, fn).map(normalize);
 };
 
 /**
