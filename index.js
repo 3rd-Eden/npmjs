@@ -23,14 +23,7 @@ var debug = require('debug')('npmjs')
  */
 var Registry = mana.extend({
   /**
-   * The name of the module.
-   *
-   * @type {String}
-   * @public
-   */
-  name: 'npmjs',
-
-  /**
+   * Initialise the module.
    *
    * @param {Object} options npmjs configuration.
    * @api private
@@ -58,7 +51,7 @@ var Registry = mana.extend({
     this.maxdelay = options.maxdelay;
     this.retries = options.retries;
     this.factor = options.factor;
-    this.url = options.registry;
+    this.api = options.registry;
 
     //
     // Pre-compile the basic authorization so we can do updates and deletes
