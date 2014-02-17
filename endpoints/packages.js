@@ -64,6 +64,20 @@ Packages.prototype.starred = function starred(name, fn) {
 };
 
 /**
+ * Find all packages that matches the giving keywords.
+ *
+ * @param {String} name The keyword.
+ * @param {Function} fn The callback.
+ * @returns {Assign}
+ * @api public
+ */
+Packages.prototype.keyword = function keyword(name, fn) {
+  return this.view('byKeyword', {
+    key: name
+  }, fn).map(this.api.map.simple);
+};
+
+/**
  * Retrieve all release specific information for the given package name.
  *
  * @param {String} name The package name.
