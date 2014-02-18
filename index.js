@@ -59,9 +59,13 @@ var Registry = mana.extend({
     //
     if (!this.authorization && options.user && options.password) {
       debug('received authorization information for %s', options.user);
-      this.authorization = 'Basic '+ new Buffer(
+      this.authorization = new Buffer(
         options.user +':'+ options.password
       ).toString('base64');
+    }
+
+    if (Buffer.isBuffer(this.authorization)) {
+      this.authorization = 'Basic '+ this.authorization;
     }
   },
 
