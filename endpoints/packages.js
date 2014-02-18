@@ -28,7 +28,7 @@ function Packages(api) {
  * @api public
  */
 Packages.prototype.get = function get(name, fn) {
-  return this.send(name, fn).map(normalize);
+  return this.send(name, fn).map(normalize.packages);
 };
 
 /**
