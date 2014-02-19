@@ -141,7 +141,7 @@ function packages(data) {
   //
   if (!data.modified || !data.created) {
     data.modified = data.modified || data.mtime;
-    data.created = data.created || data.time;
+    data.created = data.created || data.ctime;
 
     if ('object' === typeof data.time) {
       if (data.time.modified && !data.modified) data.modified = data.time.modified;

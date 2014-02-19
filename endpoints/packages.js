@@ -163,6 +163,9 @@ Packages.prototype.release = function release(name, range, fn) {
  * than a simple `.get` but much more detailed and accurate as it uses custom
  * parsers and mapping operations to parse the data as good as possible.
  *
+ * @TODO Extract missing descriptions from github.
+ * @TODO Merge profile information from github / authors.
+ *
  * @param {String} name The name of the node module.
  * @param {Function} fn The callback.
  * @returns {Assign}
