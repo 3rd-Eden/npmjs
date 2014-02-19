@@ -1,5 +1,8 @@
 'use strict';
 
+var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got spec'd.
+  , semver = require('./semver');
+
 /**
  * Normalize user profile information.
  *
@@ -60,6 +63,95 @@ exports.users = function users(data) {
  */
 exports.packages = function packages(data) {
   if (!data || 'object' !== typeof data) return {};
+
+  var releases = Object.keys(data.versions || data.times || {})
+    , latest;
+
+  releases.filter(function clean(version) {
+    return !!semver.valid(version);
+  }).sort(function sort(a, b) {
+    return semver.gt(a, b) ? -1 : 1;
+  });
+
+  //
+  // Clean up the dist-tags before we can figure out the latest package.
+  //
+  if ('object' !== typeof data['dist-tags']) data['dist-tags'] = {};
+  if (!('latest' in data['dist-tags'])) data['dist-tags'].latest = releases[0];
+
+  latest = (data.versions || {})[data['dist-tags'].latest] || {};
+
+  [
+    { key: 'bundledDependencies',   value: [] },
+    { key: 'dependencies',          value: {} },
+    { key: 'description',           value: '' },
+    { key: 'devDependencies',       value: {} },
+    { key: 'engines',               value: {} },
+    { key: 'keywords',              value: [] },
+    { key: 'maintainers',           value: [] },
+    { key: 'optionalDependencies',  value: {} },
+    { key: 'peerDependencies',      value: {} },
+    { key: 'readme',                value: '' },
+    { key: 'readmeFilename',        value: '' },
+    { key: 'scripts',               value: {} },
+    { key: 'time',                  value: {} },
+    { key: 'version',               value: '' },
+    { key: 'versions',              value: {} },
+  ].forEach(function each(transform) {
+    data[transform.key] = data[transform.key] || latest[transform.key] || transform.value;
+  });
+
+  // These can not be transformed to a normal value that easily
+  data._id = data.name = data.name || data._id || latest.name || latest._id;
+  data.releases = releases;
+  data.latest = latest;
+
+  //
+  // Transform keywords in to an array.
+  //
+  if ('string' === typeof data.keywords) data.keywords.split(/[\s|,]{1,}/);
+
+  //
+  // Add modification and creation as real date objects to the data structure.
+  // They are hidden in a `time` object.
+  //
+  if (!data.modified || !data.created) {
+    data.modified = data.modified || data.mtime;
+    data.created = data.created || data.time;
+
+    if ('object' === typeof data.time) {
+      if (data.time.modified && !data.modified) data.modified = data.time.modified;
+      if (data.time.created && !data.created) data.created = data.time.created;
+    }
+
+    data.modified = data.modified || creation;
+    data.created = data.created || creation;
+  }
+
+  //
+  // Transform all dates to valid Date instances.
+  //
+  if ('string' === typeof data.modified) data.modified = new Date(data.modified);
+  if ('string' === typeof data.created) data.created = new Date(data.created);
+
+  Object.keys(data.time).forEach(function normalize(version) {
+    data.time[version] = new Date(data.time[version]);
+  });
+
+  //
+  // data.users is actually the people who've starred this module using npm.star
+  // nobody in their right minds would have known that if you know what you're
+  // looking for.
+  //
+  data.starred = Object.keys(data.users || latest.users || {});
+
+  //
+  // Clean up the data structure with information that is not needed or is
+  // pointlessly recursive. Or should not be defined if it's empty.
+  //
+  if (!data.readmeFilename) delete data.readmeFile;
+  if (data._attachments) delete data._attachments;
+  if (!data.readme) delete data.readme;
 
   return data;
 };
