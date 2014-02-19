@@ -1,7 +1,19 @@
 'use strict';
 
 var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got spec'd.
+  , toString = Object.prototype.toString
   , semver = require('./semver');
+
+/**
+ * Get accurate type information for the given JavaScript class.
+ *
+ * @param {Mixed} of The thing who's type class we want to figure out.
+ * @returns {String} lowercase variant of the name.
+ * @api private
+ */
+function type(of) {
+  return toString.call(of).slice(8, -1).toLowerCase();
+}
 
 /**
  * Normalize user profile information.
@@ -10,8 +22,8 @@ var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got sp
  * @returns {Object} The cleaned up data structure.
  * @api public
  */
-exports.users = function users(data) {
-  if (!data || 'object' !== typeof data) return {};
+function users(data) {
+  if (!data || 'object' !== type(data)) return {};
 
   //
   // Clean up github information by extracting github user name from the URL and
@@ -38,7 +50,7 @@ exports.users = function users(data) {
   if (data.twitter) {
     var twitter = /twitter.com\/[#!@\/]{0,}([^\/]+)\/?/gi;
 
-    if ('string' !== data.twitter) {
+    if ('string' !== typeof data.twitter) {
       delete data.twitter;
     } else if (data.twitter.indexOf('@') === 0) {
       data.twitter = data.twitter.slice(1);
@@ -52,7 +64,7 @@ exports.users = function users(data) {
   }
 
   return data;
-};
+}
 
 /**
  * Normalize package data.
@@ -61,14 +73,15 @@ exports.users = function users(data) {
  * @returns {Object} The cleaned up data structure.
  * @api public
  */
-exports.packages = function packages(data) {
-  if (!data || 'object' !== typeof data) return {};
+function packages(data) {
+  if (!data || 'object' !== type(data)) return {};
 
   var releases = Object.keys(data.versions || data.times || {})
     , latest;
 
   releases.filter(function clean(version) {
-    return !!semver.valid(version);
+    try { return !!semver.valid(version, true); }
+    catch (e) { return false; }
   }).sort(function sort(a, b) {
     return semver.gt(a, b) ? -1 : 1;
   });
@@ -98,7 +111,17 @@ exports.packages = function packages(data) {
     { key: 'version',               value: '' },
     { key: 'versions',              value: {} },
   ].forEach(function each(transform) {
-    data[transform.key] = data[transform.key] || latest[transform.key] || transform.value;
+    var key = transform.key;
+
+    data[key] = data[key] || latest[key] || transform.value;
+
+    //
+    // Additional check to ensure that the field has the correct value. Or we
+    // will default to our normal value.
+    //
+    if (type(data[transform.key]) !== type(transform.value)) {
+      data[transform.key] = transform.value;
+    }
   });
 
   // These can not be transformed to a normal value that easily
@@ -110,6 +133,7 @@ exports.packages = function packages(data) {
   // Transform keywords in to an array.
   //
   if ('string' === typeof data.keywords) data.keywords.split(/[\s|,]{1,}/);
+  if (!Array.isArray(data.keywords)) delete data.keywords;
 
   //
   // Add modification and creation as real date objects to the data structure.
@@ -153,5 +177,14 @@ exports.packages = function packages(data) {
   if (data._attachments) delete data._attachments;
   if (!data.readme) delete data.readme;
 
+  // @TODO reuse github information for missing bugs fields.
+  // @TODO normalize .web / .url in repo, license author etc.
+  // @TODO reuse github for homepage.
   return data;
-};
+}
+
+//
+// Expose the packages and users.
+//
+exports.packages = packages;
+exports.users = users;
