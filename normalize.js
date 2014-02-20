@@ -115,7 +115,7 @@ function packages(data) {
   ].forEach(function each(transform) {
     var key = transform.key;
 
-    data[key] = data[key] || latest[key] || transform.value;
+    data[key] = latest[key] || data[key] || transform.value;
 
     //
     // Additional check to ensure that the field has the correct value. Or we
