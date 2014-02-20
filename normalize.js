@@ -80,7 +80,7 @@ function packages(data) {
   var releases = Object.keys(data.versions || data.times || {})
     , latest;
 
-  releases.filter(function clean(version) {
+  releases = releases.filter(function clean(version) {
     try { return !!semver.valid(version, true); }
     catch (e) { return false; }
   }).sort(function sort(a, b) {
