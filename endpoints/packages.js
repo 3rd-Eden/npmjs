@@ -143,6 +143,8 @@ Packages.prototype.releases = function releases(name, fn) {
  * @api public
  */
 Packages.prototype.release = function release(name, range, fn) {
+  if (!semver.validRange(range)) return fn(new Error('Invalid semver range'));
+
   return this.releases(name, function releases(err, versions) {
     if (err) return fn(err);
 
