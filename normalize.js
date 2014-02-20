@@ -2,6 +2,7 @@
 
 var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got spec'd.
   , toString = Object.prototype.toString
+  , extract = require('extract-github')
   , semver = require('./semver');
 
 /**
@@ -110,6 +111,7 @@ function packages(data) {
     { key: 'time',                  value: {} },
     { key: 'version',               value: '' },
     { key: 'versions',              value: {} },
+    { key: '_npmUser',              value: {} }
   ].forEach(function each(transform) {
     var key = transform.key;
 
@@ -126,6 +128,7 @@ function packages(data) {
 
   // These can not be transformed to a normal value that easily
   data._id = data.name = data.name || data._id || latest.name || latest._id;
+  data.github = extract(data);
   data.releases = releases;
   data.latest = latest;
 
