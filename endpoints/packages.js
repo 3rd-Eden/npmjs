@@ -123,7 +123,8 @@ Packages.prototype.releases = function releases(name, fn) {
       , version: release.version || '0.0.0'
       , shasum: release.dist.shasum || ''
       , dependencies: release.dependencies || {}
-      , license: release.license || release.licenses
+      , license: release.license
+      , licenses: release.licenses
       , devDependencies: release.devDependencies || {}
       , peerDependencies: release.peerDependencies || {}
       , date: release.date || '1970-01-01T00:00:00.000Z'
@@ -178,10 +179,10 @@ Packages.prototype.details = function details(name, fn) {
 
   return this.get(name, fn).async.map(function map(data, next) {
     licenses(data, { githulk: packages.githulk }, function parsed(err, licenses) {
-      if (err) return next(err);
-
       data.licenses = licenses;
-      next(undefined, data);
+
+      if (err) debug('failed to detect license: %s', err.message);
+      return next(err, data);
     });
   });
 };
