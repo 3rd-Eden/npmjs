@@ -146,9 +146,15 @@ function packages(data) {
     data.modified = data.modified || data.mtime;
     data.created = data.created || data.ctime;
 
-    if ('object' === typeof data.time) {
-      if (data.time.modified && !data.modified) data.modified = data.time.modified;
-      if (data.time.created && !data.created) data.created = data.time.created;
+    if (data.time.modified && !data.modified) data.modified = data.time.modified;
+    if (data.time.created && !data.created) data.created = data.time.created;
+
+    if (!data.modified && releases[0] in data.time) {
+      data.modified = data.time[releases[0]];
+    }
+
+    if (!data.created && releases[releases.length -1] in data.time) {
+      data.created = data.time[releases[releases.length -1]];
     }
 
     data.modified = data.modified || creation;
@@ -178,7 +184,7 @@ function packages(data) {
   //
   if (!data.readmeFilename) delete data.readmeFile;
   if (data._attachments) delete data._attachments;
-  if (!data.readme) delete data.readme;
+  if (!data.readme || /no readme data found/i.test(data.readme)) delete data.readme;
 
   // @TODO reuse github information for missing bugs fields.
   // @TODO normalize .web / .url in repo, license author etc.
