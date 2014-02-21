@@ -42,6 +42,7 @@ var Registry = mana.extend({
     options.mirrors = 'mirrors' in options ? options.mirrors : mirrors;
     options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
     options.mindelay = 'mindelay' in options ? options.mindelay : 100;
+    options.githulk = 'githulk' in options ? options.githulk : null;
     options.retries = 'retries' in options ? options.retries : 3;
     options.factor = 'factor' in options ? options.factor : 2;
 
@@ -49,6 +50,7 @@ var Registry = mana.extend({
     this.mirrors = options.mirrors;
     this.mindelay = options.mindelay;
     this.maxdelay = options.maxdelay;
+    this.githulk = options.githulk;
     this.retries = options.retries;
     this.factor = options.factor;
     this.api = options.registry;
