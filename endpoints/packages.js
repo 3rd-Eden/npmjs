@@ -83,7 +83,7 @@ Packages.prototype.keyword = function keyword(name, fn) {
  * @api public
  */
 Packages.prototype.releases = function releases(name, fn) {
-  return this.get(name, fn).emits(function emit(data, add) {
+  return this.details(name, fn).emits(function emit(data, add) {
     if (!data.versions) return;
 
     //
@@ -174,8 +174,10 @@ Packages.prototype.release = function release(name, range, fn) {
  * @api public
  */
 Packages.prototype.details = function details(name, fn) {
+  var packages = this;
+
   return this.get(name, fn).async.map(function map(data, next) {
-    licenses(data, function parsed(err, licenses) {
+    licenses(data, { githulk: packages.githulk }, function parsed(err, licenses) {
       if (err) return next(err);
 
       data.licenses = licenses;
