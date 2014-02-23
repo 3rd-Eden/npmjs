@@ -53,6 +53,28 @@ npm account. The following methods are implemented:
 - `npm.users.starred`: Packages that the user has starred.
 - `npm.users.get`: Get the profile information.
 
+## Normalization
+
+As the internal data structure is do damn awkward in npm we need to normalize the
+data structures before we can even try to use it. While this normalization is
+part automatically done for you internally there might be use cases where you
+want to manually normalize a given dataset.
+
+The normalize module can be required directly using:
+
+```js
+var normalize = require('npmjs/normalize');
+```
+
+The `normalize` variable now contains two different functions, `users` and
+`packages`. As you might have guessed, these functions normalize different data
+structures. The function accepts a simple single argument which is the data
+object that you receive from the npm registry endpoints.
+
+```js
+data = normalize.packages(data);
+```
+
 ## License
 
 MIT
