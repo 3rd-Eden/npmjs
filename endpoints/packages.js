@@ -93,7 +93,7 @@ Packages.prototype.releases = function releases(name, fn) {
       var release = data.versions[version];
       release.date = data.time[version];
 
-      add(release);
+      add(normalize.packages(release, data));
     });
 
     //
@@ -113,7 +113,7 @@ Packages.prototype.releases = function releases(name, fn) {
       release.date = data.time[version];
       release.tag = key;
 
-      add(release);
+      add(normalize.packages(release, data));
     });
 
     return false;
