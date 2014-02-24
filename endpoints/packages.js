@@ -83,6 +83,8 @@ Packages.prototype.keyword = function keyword(name, fn) {
  * @api public
  */
 Packages.prototype.releases = function releases(name, fn) {
+  var api = this.api;
+
   return this.details(name, fn).emits(function emit(data, add) {
     if (!data.versions) return;
 
@@ -103,7 +105,7 @@ Packages.prototype.releases = function releases(name, fn) {
       if (key in data.versions) return; // Prevent duplicates
 
       var version = data['dist-tags'][key]
-        , release = JSON.parse(JSON.stringify(data.versions[version]));
+        , release = api.merge({}, data.versions[version]);
 
       //
       // The JSON.parse(JSON.stringify)) is needed to create a full clone of the
