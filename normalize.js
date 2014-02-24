@@ -184,7 +184,19 @@ function packages(data) {
   //
   if (!data.readmeFilename) delete data.readmeFile;
   if (data._attachments) delete data._attachments;
+
+  //
+  // Another npm oddety, if you don't have a README file it will just add `no
+  // README data found` as content instead of actually solving this at the view
+  // level of a website.
+  //
   if (!data.readme || /no readme data found/i.test(data.readme)) delete data.readme;
+
+  //
+  // It could be that a given module has been (forcefully) unpublished by the
+  // registry.
+  //
+  data.unpublished = data._deleted === true || !!data.time.unpublished;
 
   // @TODO reuse github information for missing bugs fields.
   // @TODO normalize .web / .url in repo, license author etc.
