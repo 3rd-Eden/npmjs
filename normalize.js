@@ -128,10 +128,11 @@ function users(data) {
  * Normalize package data.
  *
  * @param {Object} data The package data.
+ * @param {Object} fallback Optional data structure to fallback
  * @returns {Object} The cleaned up data structure.
  * @api public
  */
-function packages(data) {
+function packages(data, fallback) {
   if (!data || 'object' !== type(data)) return {};
 
   var releases = Object.keys(data.versions || data.times || {})
@@ -151,12 +152,13 @@ function packages(data) {
   if (!('latest' in data['dist-tags'])) data['dist-tags'].latest = releases[0];
 
   latest = (data.versions || {})[data['dist-tags'].latest] || {};
+  if (!fallback) fallback = latest;
 
   //
   // These can not be transformed to a normal value that easily so we set them
   // first.
   //
-  data._id = data.name = data.name || data._id || latest.name || latest._id;
+  data._id = data.name = data.name || data._id || fallback.name || fallback._id;
   data.github = extract(data);
   data.releases = releases;
   data.latest = latest;
@@ -182,7 +184,7 @@ function packages(data) {
   ].forEach(function each(transform) {
     var key = transform.key;
 
-    data[key] = latest[key] || data[key] || transform.value;
+    data[key] = fallback[key] || data[key] || transform.value;
 
     //
     // Additional check to ensure that the field has the correct value. Or we
@@ -248,7 +250,7 @@ function packages(data) {
   // nobody in their right minds would have known that if you know what you're
   // looking for.
   //
-  data.starred = Object.keys(data.users || latest.users || {});
+  data.starred = Object.keys(data.users || fallback.users || {});
 
   //
   // Clean up the data structure with information that is not needed or is
