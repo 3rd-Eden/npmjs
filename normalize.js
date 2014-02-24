@@ -152,7 +152,7 @@ function packages(data, fallback) {
   if (!('latest' in data['dist-tags'])) data['dist-tags'].latest = releases[0];
 
   latest = (data.versions || {})[data['dist-tags'].latest] || {};
-  if (!fallback) fallback = latest;
+  if (type(fallback) !== 'object') fallback = latest;
 
   //
   // These can not be transformed to a normal value that easily so we set them
