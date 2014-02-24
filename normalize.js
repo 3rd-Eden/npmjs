@@ -42,6 +42,38 @@ function gravatar(data) {
 }
 
 /**
+ * Check if we have a valid repository.
+ *
+ * @param {Mixed} repo Repository object, thing.
+ */
+function repository(repo) {
+  //
+  // We don't have repository information, but we did detect github information
+  // in the data object so we're using that to construct an url.
+  //
+  if (!repo && this.github) {
+    return {
+      url: 'https://github.com/'+ this.github.user +'/'+ this.github.repo
+    };
+  }
+
+  switch (type(repo)) {
+    case 'string': return { url: repo };
+    case 'object':
+      if ('url' in repo) return repo;
+
+      if ('web' in repo) {
+        repo.url = repo.web;
+        delete repo.web;
+
+        return repo;
+      }
+  }
+
+  return undefined;
+}
+
+/**
  * Normalize user profile information.
  *
  * @param {Object} data The profile data.
@@ -130,22 +162,23 @@ function packages(data) {
   data.latest = latest;
 
   [
-    { key: 'bundledDependencies',   value: []                   },
-    { key: 'dependencies',          value: {}                   },
-    { key: 'description',           value: ''                   },
-    { key: 'devDependencies',       value: {}                   },
-    { key: 'engines',               value: {}                   },
-    { key: 'keywords',              value: []                   },
-    { key: 'maintainers',           value: [], parse: gravatar  },
-    { key: 'optionalDependencies',  value: {}                   },
-    { key: 'peerDependencies',      value: {}                   },
-    { key: 'readme',                value: ''                   },
-    { key: 'readmeFilename',        value: ''                   },
-    { key: 'scripts',               value: {}                   },
-    { key: 'time',                  value: {}                   },
-    { key: 'version',               value: ''                   },
-    { key: 'versions',              value: {}                   },
-    { key: '_npmUser',              value: {}, parse: gravatar  }
+    { key: 'bundledDependencies',   value: []                     },
+    { key: 'dependencies',          value: {}                     },
+    { key: 'description',           value: ''                     },
+    { key: 'devDependencies',       value: {}                     },
+    { key: 'engines',               value: {}                     },
+    { key: 'keywords',              value: []                     },
+    { key: 'maintainers',           value: [], parse: gravatar    },
+    { key: 'optionalDependencies',  value: {}                     },
+    { key: 'peerDependencies',      value: {}                     },
+    { key: 'readme',                value: ''                     },
+    { key: 'readmeFilename',        value: ''                     },
+    { key: 'repository',            value: {}, parse: repository  },
+    { key: 'scripts',               value: {}                     },
+    { key: 'time',                  value: {}                     },
+    { key: 'version',               value: ''                     },
+    { key: 'versions',              value: {}                     },
+    { key: '_npmUser',              value: {}, parse: gravatar    }
   ].forEach(function each(transform) {
     var key = transform.key;
 
