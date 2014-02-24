@@ -1,5 +1,5 @@
 {
-  "name": "npmjs",
+  "name": "npm.js",
   "version": "0.0.7",
   "description": "An alternate npm registry client",
   "main": "index.js",

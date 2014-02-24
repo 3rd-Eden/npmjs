@@ -32,6 +32,19 @@ Users.prototype.add = function add(name, pkg, fn) {
 };
 
 /**
+ * Create a new npm account.
+ *
+ * @param {String} username The desired user name.
+ * @param {String} email Accounts email.
+ * @param {String} password Account password.
+ * @param {Function} fn Callback.
+ * @api public
+ */
+Users.prototype.create = function create(username, email, password, fn) {
+
+};
+
+/**
  * List all packages for the given name.
  *
  * @param {String} name The user's name who's packages we want to list.
