@@ -1,17 +1,17 @@
 # npmjs
 
-To keep myself sane while working with the npm registry I decided to write my
+To keep myself sane while working with The npm Registry I decided to write my
 own library to deal with all the incomplete, inconsistent and horrible data
-structures that are available in the npm registry. NoSQL is nice and all, but
+structures that are available in The npm Registry. NoSQL is nice and all, but
 that doesn't mean you should leave your data unmaintained. This library is never
-meant as a full replacement of the `npm-registry-client` which the `npm` bin is
-using. Unless those API's and methods are so poorly implemented or designed that
-I get a mental breakdown, then yes, this will become a full and usable
-replacement of the above said module.
+meant as a full replacement of the `npm-registry-client` which the `npm` bin
+file is using. Unless those API's and methods are so poorly implemented or
+designed that I get a mental breakdown, then yes, this will become a full and
+usable replacement of the above said module.
 
 This module is written with high availability in mind. The main reason behind
-this is that npm inc. has added a lot of moving parts on top of the registry
-which frequently breaks. In order to combat that we've implemented automatic
+this is that npm Inc. has added a lot of moving parts on top of the registry
+which frequently breaks. In order to combat this I've implemented automatic
 downgrading to multiple registries. If all other supplied registries fail to
 work an automatic exponential randomized back off algorithm kicks in place and
 retries the query once more. This functionality is all provided by the awesome
@@ -19,11 +19,11 @@ retries the query once more. This functionality is all provided by the awesome
 
 ## Installation
 
-This module is released in the `npm` registry as `npmjs` because nobody bothered
+This module is released in the `npm` registry as `npm.js` because nobody bothered
 registering it before. HA.
 
 ```
-npm install --save npmjs
+npm install --save npm.js
 ```
 
 And that is all you need to type in your terminal in order to prevent becoming
