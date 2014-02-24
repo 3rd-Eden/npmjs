@@ -100,6 +100,8 @@ Packages.prototype.releases = function releases(name, fn) {
     // Also add each tag to the releases.
     //
     if ('dist-tags' in data) Object.keys(data['dist-tags']).forEach(function (key) {
+      if (key in data.versions) return; // Prevent duplicates
+
       var version = data['dist-tags'][key]
         , release = JSON.parse(JSON.stringify(data.versions[version]));
 
@@ -108,7 +110,6 @@ Packages.prototype.releases = function releases(name, fn) {
       // data structure as we're adding tags. That would be override during the
       // `reduce` procedure.
       //
-
       release.date = data.time[version];
       release.tag = key;
 
@@ -116,19 +117,6 @@ Packages.prototype.releases = function releases(name, fn) {
     });
 
     return false;
-  }).map(function map(release) {
-    return {
-        tag: release.tag || ''
-      , name: release.name || ''
-      , version: release.version || '0.0.0'
-      , shasum: release.dist.shasum || ''
-      , dependencies: release.dependencies || {}
-      , license: release.license
-      , licenses: release.licenses
-      , devDependencies: release.devDependencies || {}
-      , peerDependencies: release.peerDependencies || {}
-      , date: release.date || '1970-01-01T00:00:00.000Z'
-    };
   }).reduce(function reduce(memo, release) {
       memo[release.tag || release.version] = release;
       return memo;
