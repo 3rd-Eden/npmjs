@@ -120,6 +120,15 @@ function packages(data) {
 
   latest = (data.versions || {})[data['dist-tags'].latest] || {};
 
+  //
+  // These can not be transformed to a normal value that easily so we set them
+  // first.
+  //
+  data._id = data.name = data.name || data._id || latest.name || latest._id;
+  data.github = extract(data);
+  data.releases = releases;
+  data.latest = latest;
+
   [
     { key: 'bundledDependencies',   value: []                   },
     { key: 'dependencies',          value: {}                   },
@@ -155,18 +164,12 @@ function packages(data) {
     //
     if (transform.parse) {
       if (Array.isArray(data[transform.key])) {
-        data[transform.key] = data[transform.key].map(transform.parse);
+        data[transform.key] = data[transform.key].map(transform.parse.bind(data));
       } else {
-        data[transform.key] = transform.parse(data[transform.key]);
+        data[transform.key] = transform.parse.call(data, data[transform.key]);
       }
     }
   });
-
-  // These can not be transformed to a normal value that easily
-  data._id = data.name = data.name || data._id || latest.name || latest._id;
-  data.github = extract(data);
-  data.releases = releases;
-  data.latest = latest;
 
   //
   // Transform keywords in to an array.
