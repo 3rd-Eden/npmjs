@@ -164,12 +164,14 @@ function packages(data, fallback) {
   data.latest = latest;
 
   [
+    { key: '_npmUser',              value: {}, parse: gravatar    },
     { key: 'bundledDependencies',   value: []                     },
     { key: 'dependencies',          value: {}                     },
     { key: 'description',           value: ''                     },
     { key: 'devDependencies',       value: {}                     },
     { key: 'engines',               value: {}                     },
     { key: 'keywords',              value: []                     },
+    { key: 'licenses',              value: []                     },
     { key: 'maintainers',           value: [], parse: gravatar    },
     { key: 'optionalDependencies',  value: {}                     },
     { key: 'peerDependencies',      value: {}                     },
@@ -179,8 +181,7 @@ function packages(data, fallback) {
     { key: 'scripts',               value: {}                     },
     { key: 'time',                  value: {}                     },
     { key: 'version',               value: ''                     },
-    { key: 'versions',              value: {}                     },
-    { key: '_npmUser',              value: {}, parse: gravatar    }
+    { key: 'versions',              value: {}                     }
   ].forEach(function each(transform) {
     var key = transform.key;
 
