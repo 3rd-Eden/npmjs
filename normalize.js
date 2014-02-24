@@ -3,7 +3,8 @@
 var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got spec'd.
   , toString = Object.prototype.toString
   , extract = require('extract-github')
-  , semver = require('./semver');
+  , semver = require('./semver')
+  , crypto = require('crypto');
 
 /**
  * Get accurate type information for the given JavaScript class.
@@ -14,6 +15,30 @@ var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got sp
  */
 function type(of) {
   return toString.call(of).slice(8, -1).toLowerCase();
+}
+
+/**
+ * Create a gravatar for the given email.
+ *
+ * @param {Object} data Object that has an `email` property.
+ * @returns {Object} The data object.
+ * @private
+ */
+function gravatar(data) {
+  var email = (
+    'string' === typeof data.email
+      ? data.email
+      : ''
+  ).toLowerCase().trim();
+
+  if (!email || (data.gravatar && !~data.gravatar.indexOf('?'))) {
+    return data; // Gravatar's are constructed from email addresses.
+  }
+
+  data.gravatar = 'https://secure.gravatar.com/avatar/'
+   + crypto.createHash('md5').update(email).digest('hex');
+
+   return data;
 }
 
 /**
@@ -96,22 +121,22 @@ function packages(data) {
   latest = (data.versions || {})[data['dist-tags'].latest] || {};
 
   [
-    { key: 'bundledDependencies',   value: [] },
-    { key: 'dependencies',          value: {} },
-    { key: 'description',           value: '' },
-    { key: 'devDependencies',       value: {} },
-    { key: 'engines',               value: {} },
-    { key: 'keywords',              value: [] },
-    { key: 'maintainers',           value: [] },
-    { key: 'optionalDependencies',  value: {} },
-    { key: 'peerDependencies',      value: {} },
-    { key: 'readme',                value: '' },
-    { key: 'readmeFilename',        value: '' },
-    { key: 'scripts',               value: {} },
-    { key: 'time',                  value: {} },
-    { key: 'version',               value: '' },
-    { key: 'versions',              value: {} },
-    { key: '_npmUser',              value: {} }
+    { key: 'bundledDependencies',   value: []                   },
+    { key: 'dependencies',          value: {}                   },
+    { key: 'description',           value: ''                   },
+    { key: 'devDependencies',       value: {}                   },
+    { key: 'engines',               value: {}                   },
+    { key: 'keywords',              value: []                   },
+    { key: 'maintainers',           value: [], parse: gravatar  },
+    { key: 'optionalDependencies',  value: {}                   },
+    { key: 'peerDependencies',      value: {}                   },
+    { key: 'readme',                value: ''                   },
+    { key: 'readmeFilename',        value: ''                   },
+    { key: 'scripts',               value: {}                   },
+    { key: 'time',                  value: {}                   },
+    { key: 'version',               value: ''                   },
+    { key: 'versions',              value: {}                   },
+    { key: '_npmUser',              value: {}, parse: gravatar  }
   ].forEach(function each(transform) {
     var key = transform.key;
 
@@ -123,6 +148,17 @@ function packages(data) {
     //
     if (type(data[transform.key]) !== type(transform.value)) {
       data[transform.key] = transform.value;
+    }
+
+    //
+    // If there's an additional data transformer run that over the structure.
+    //
+    if (transform.parse) {
+      if (Array.isArray(data[transform.key])) {
+        data[transform.key] = data[transform.key].map(transform.parse);
+      } else {
+        data[transform.key] = transform.parse(data[transform.key]);
+      }
     }
   });
 
