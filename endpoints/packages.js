@@ -168,7 +168,10 @@ Packages.prototype.details = function details(name, fn) {
   var packages = this;
 
   return this.get(name, fn).async.map(function map(data, next) {
-    licenses(data, { githulk: packages.githulk }, function parsed(err, licenses) {
+    licenses(data, {
+      githulk: packages.api.githulk,
+      npmjs: packages.api
+    }, function parsed(err, licenses) {
       data.licenses = licenses;
 
       if (err) debug('failed to detect license: %s', err.message);
