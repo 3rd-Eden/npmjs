@@ -159,6 +159,8 @@ function packages(data, fallback) {
   // first.
   //
   data._id = data.name = data.name || data._id || fallback.name || fallback._id;
+  data.licenses = fallback.licenses || data.licenses;
+  data.license = fallback.license || data.license;
   data.github = extract(data);
   data.releases = releases;
   data.latest = latest;
@@ -171,7 +173,6 @@ function packages(data, fallback) {
     { key: 'devDependencies',       value: {}                     },
     { key: 'engines',               value: {}                     },
     { key: 'keywords',              value: []                     },
-    { key: 'licenses',              value: []                     },
     { key: 'maintainers',           value: [], parse: gravatar    },
     { key: 'optionalDependencies',  value: {}                     },
     { key: 'peerDependencies',      value: {}                     },
@@ -188,22 +189,22 @@ function packages(data, fallback) {
     data[key] = fallback[key] || data[key] || transform.value;
 
     //
-    // Additional check to ensure that the field has the correct value. Or we
-    // will default to our normal value.
+    // If there's an additional data transformer run that over the structure.
     //
-    if (type(data[transform.key]) !== type(transform.value)) {
-      data[transform.key] = transform.value;
+    if (transform.parse && data[key]) {
+      if (Array.isArray(data[key])) {
+        data[key] = data[key].map(transform.parse.bind(data));
+      } else {
+        data[key] = transform.parse.call(data, data[key]);
+      }
     }
 
     //
-    // If there's an additional data transformer run that over the structure.
+    // Additional check to ensure that the field has the correct value. Or we
+    // will default to our normal value.
     //
-    if (transform.parse) {
-      if (Array.isArray(data[transform.key])) {
-        data[transform.key] = data[transform.key].map(transform.parse.bind(data));
-      } else {
-        data[transform.key] = transform.parse.call(data, data[transform.key]);
-      }
+    if (type(data[key]) !== type(transform.value)) {
+      data[key] = transform.value;
     }
   });
 
