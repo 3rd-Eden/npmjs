@@ -85,7 +85,7 @@ var Registry = mana.extend({
       };
     }
   }
-}).drink(module);
+});
 
 //
 // Expose list of public endpoints that people can use to connect.
@@ -97,3 +97,8 @@ Registry.mirrors = {
   npmjseu:      'http://registry.npmjs.eu/',
   npmjs:        'http://registry.npmjs.org/'
 };
+
+//
+// Drink our own potion.
+//
+Registry.drink(module);
