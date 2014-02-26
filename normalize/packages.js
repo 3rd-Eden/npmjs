@@ -2,7 +2,7 @@
 
 var creation = '2010-01-14T01:41:08-08:00'  // The date that the registry got spec'd.
   , extract = require('extract-github')
-  , semver = require('./semver')
+  , semver = require('../semver')
   , to = require('./to');
 
 /**
