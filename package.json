@@ -1,6 +1,6 @@
 {
   "name": "npm.js",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "An alternate npm registry client",
   "main": "index.js",
   "scripts": {
