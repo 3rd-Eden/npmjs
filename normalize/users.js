@@ -27,6 +27,14 @@ function users(data) {
     } else {
       data.github = data.github.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
     }
+
+    //
+    // The user didn't specify a homepage, we're going to default to their
+    // Github profile as that is the most interesting for most developers.
+    //
+    if ('string' === typeof data.github && !data.homepage) {
+      data.homepage = 'https://github.com/'+ data.github;
+    }
   }
 
   //
@@ -49,6 +57,19 @@ function users(data) {
         .replace(/^https?:\/\/twitter.com\//i, '');
     }
   }
+
+  //
+  // Make sure we follow the same gravatar URL pattern as the maintainers in the
+  // packages.
+  //
+  to.gravatar(data);
+
+  //
+  // The fields is way to opinionated and should have existed in the npm's
+  // website instead. We're going to remove this as it's only duplicate
+  // bullshit.
+  //
+  delete data.fields;
 
   return data;
 }
