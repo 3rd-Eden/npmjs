@@ -1,4 +1,4 @@
-# npmjs
+# npm-registry
 
 To keep myself sane while working with The npm Registry I decided to write my
 own library to deal with all the incomplete, inconsistent and horrible data
@@ -19,11 +19,8 @@ retries the query once more. This functionality is all provided by the awesome
 
 ## Installation
 
-This module is released in the `npm` registry as `npm.js` because nobody bothered
-registering it before. HA.
-
 ```
-npm install --save npm.js
+npm install --save npm-registry
 ```
 
 And that is all you need to type in your terminal in order to prevent becoming
