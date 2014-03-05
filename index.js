@@ -46,6 +46,13 @@ var Registry = mana.extend({
     options.retries = 'retries' in options ? options.retries : 3;
     options.factor = 'factor' in options ? options.factor : 2;
 
+    //
+    // Make sure that the given registry is a string as we can only connect to
+    // URL's. If it isn't an string we assume it's an object with an `url`
+    // parameter.
+    //
+    if ('string' !== options.registry) options.registry = options.registry.url;
+
     this.authorization = options.authorization;
     this.mirrors = options.mirrors;
     this.mindelay = options.mindelay;
@@ -95,7 +102,8 @@ Registry.mirrors = {
   strongloop:   'http://npm.strongloop.com/',
   npmjsau:      'http://registry.npmjs.org.au/',
   npmjseu:      'http://registry.npmjs.eu/',
-  npmjs:        'http://registry.npmjs.org/'
+  npmjs:        'http://registry.npmjs.org/',
+  cnpmjs:       'http://registry.cnpmjs.org/'
 };
 
 //
