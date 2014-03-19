@@ -20,7 +20,11 @@ function Packages(api) {
 }
 
 /**
- * Get information from the npm package.
+ * Get information from the npm package. If the name contains an `@` char we
+ * assume that the user wants to get a specific version instead.
+ * Example:
+ *
+ * - primus@0.1.1 would retreive primus version 0.1.1
  *
  * @param {String} name The name of the node module.
  * @param {Function} fn The callback.
@@ -28,7 +32,7 @@ function Packages(api) {
  * @api public
  */
 Packages.prototype.get = function get(name, fn) {
-  return this.send(name, fn).map(normalize.packages);
+  return this.send(name.replace('@', '/'), fn).map(normalize.packages);
 };
 
 /**
@@ -126,14 +130,28 @@ Packages.prototype.releases = function releases(name, fn) {
 };
 
 /**
+ * Get a specific release of a package.
+ *
+ * @param {String} name The name of the package
+ * @param {String} version A valid version number or tag from the package.
+ * @param {Function} fn The callback
+ * @returns {Assign} Assignment
+ * @api public
+ */
+Packages.prototype.release = function release(name, version, fn) {
+  return this.details(name +'/'+ version, fn).map(normalize.packages);
+};
+
+/**
  * Get a version for a specific release.
  *
  * @param {String} name The name of the package.
- * @param {String} version The version number we should retrieve.
- * @param {Function} fn The callback.
+ * @param {String} range The semver version range we should retrieve.
+ * @param {Function} fn The callback
+ * @returns {Assign} Assignment
  * @api public
  */
-Packages.prototype.release = function release(name, range, fn) {
+Packages.prototype.range = function ranged(name, range, fn) {
   if (!semver.validRange(range)) return fn(new Error('Invalid semver range'));
 
   return this.releases(name, function releases(err, versions) {
