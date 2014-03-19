@@ -41,7 +41,64 @@ Users.prototype.add = function add(name, pkg, fn) {
  * @api public
  */
 Users.prototype.create = function create(username, email, password, fn) {
+  password = (password || '').toString().trim();
+  username = (username || '').toString().trim();
+  email = (email || '').toString().trim();
 
+  //
+  // @TODO this will break our Assign return flow, making chaining impossible.
+  //
+  if (!password) return fn(new Error('Missing password'));
+  if (!~password.indexOf(':')) return fn(new Error('Password cannot contain a `:`'));
+  if (!email) return fn(new Error('Missing email'));
+  if (!~email.indexOf('@')) return fn(new Error('Invalid email address'));
+  if (!username) return fn(new Error('Missing username'));
+
+  return this.send('/-/user/org.couchdb.user:'+ encodeURIComponent(username), {
+    method: 'PUT',
+    json: {
+        _id: 'org.couchdb.user:'+ username
+      , date: (new Date()).toISOString()
+      , email: email
+      , name: username
+      , password: password
+      , roles: []
+      , type: 'user'
+    }
+  }, fn);
+};
+
+/**
+ * Update the user.
+ *
+ * @param {String} username The user's name.
+ * @param {Object} fields The fields we want to add.
+ * @param {Function} fn
+ */
+Users.prototype.update = function update(username, fields, fn) {
+  username = '/-/user/org.couchdb.user:'+ encodeURIComponent(username);
+
+  var users = this;
+
+  /**
+   * Small helper function to handle revisions in CouchDB.
+   *
+   * @param {Error} err An optional error object.
+   * @param {String} _rev The current rev in the CouchDB.
+   * @param {Object} data Optional data.
+   * @api private
+   */
+  function rev(err, _rev, data) {
+    if (err) return fn(err);
+
+    return users.send(username +'/-rev/'+ _rev, {
+      method: 'PUT',
+      json: users.api.merge(data || {}, fields)
+    }, fn);
+  }
+
+  if ('_rev' in fields) return rev(undefined, fields._rev);
+  return this.send(username, rev);
 };
 
 /**
@@ -75,13 +132,13 @@ Users.prototype.starred = function starred(name, fn) {
 /**
  * Get profile information.
  *
- * @param {String} name The user's name.
+ * @param {String} username The user's name.
  * @param {Function} fn The callback.
  * @returns {Assign}
  * @api public
  */
-Users.prototype.get = function get(name, fn) {
-  name = '/-/user/org.couchdb.user:'+ name;
+Users.prototype.get = function get(username, fn) {
+  username = '/-/user/org.couchdb.user:'+ encodeURIComponent(username);
 
   return this.send(name, fn).map(normalize.users);
 };
