@@ -33,7 +33,16 @@ function packages(data, fallback) {
   if (!('latest' in data['dist-tags'])) data['dist-tags'].latest = releases[0];
 
   latest = (data.versions || {})[data['dist-tags'].latest] || {};
-  if (to.type(fallback) !== 'object') fallback = latest;
+
+  if (to.type(fallback) !== 'object') {
+    fallback = latest;
+
+    //
+    // The fastest way of creating a clone of an object.
+    //
+    try { fallback = JSON.parse(JSON.stringify(fallback)); }
+    catch (e) {}
+  }
 
   //
   // These can not be transformed to a normal value that easily so we set them
