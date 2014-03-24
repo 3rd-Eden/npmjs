@@ -188,7 +188,7 @@ Packages.prototype.details = function details(name, fn) {
   return this.get(name, fn).async.map(function map(data, next) {
     licenses(data, {
       githulk: packages.api.githulk,
-      npmjs: packages.api
+      npmjs: packages
     }, function parsed(err, licenses) {
       data.licenses = licenses;
 
