@@ -24,7 +24,10 @@ function packages(data, fallback) {
     catch (e) { return false; }
   }).sort(function sort(a, b) {
     return semver.gt(a, b) ? -1 : 1;
-  });
+  }).reduce(function reduce(result, release) {
+    result[release] = data.versions[release]._npmUser;
+    return result;
+  }, {});
 
   //
   // Clean up the dist-tags before we can figure out the latest package.
