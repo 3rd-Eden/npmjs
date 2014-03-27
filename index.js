@@ -51,7 +51,7 @@ var Registry = mana.extend({
     // URL's. If it isn't an string we assume it's an object with an `url`
     // parameter.
     //
-    if ('string' !== options.registry) options.registry = options.registry.url;
+    if ('string' !== typeof options.registry) options.registry = options.registry.url;
 
     this.authorization = options.authorization;
     this.mirrors = options.mirrors;
