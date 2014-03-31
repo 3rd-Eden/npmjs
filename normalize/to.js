@@ -76,7 +76,7 @@ exports.github = function github(path) {
       existing = url.parse(existing);
       existing.protocol = !existing.protocol || 'git:' === existing.protocol ? 'http:' : existing.protocol;
       existing.slashes = true;
-      existing.path = existing.pathname = existing.pathname.replace(/\.git$/, '');
+      existing.path = existing.pathname = (existing.pathname || existing.path || '').replace(/\.git$/, '');
       existing.hash = null;
       existing = url.format(existing);
     }
