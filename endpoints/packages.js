@@ -99,7 +99,7 @@ Packages.prototype.releases = function releases(name, fn) {
       var release = data.versions[version];
       release.date = data.time[version];
 
-      add(normalize.packages(release, data));
+      add(normalize.packages(data, release));
     });
 
     //
@@ -124,8 +124,8 @@ Packages.prototype.releases = function releases(name, fn) {
 
     return false;
   }).reduce(function reduce(memo, release) {
-      memo[release.tag || release.version] = release;
-      return memo;
+    memo[release.tag || release.version] = release;
+    return memo;
   }, {});
 };
 
