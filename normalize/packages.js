@@ -52,8 +52,8 @@ function packages(data, fallback) {
   // first.
   //
   data._id = data.name = data.name || data._id || fallback.name || fallback._id;
-  data.licenses = fallback.licenses || data.licenses;
   data.license = fallback.license || data.license;
+  data.licenses = to.licenses(data, fallback);
   data.github = extract(data);
   data.releases = releases;
   data.latest = latest;
