@@ -1,6 +1,6 @@
 {
   "name": "npm-registry",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "An high available npm registry client",
   "main": "index.js",
   "scripts": {
@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/3rd-Eden/npmjs",
   "dependencies": {
-    "debug": "0.7.x",
+    "debug": "0.8.x",
     "extract-github": "0.0.x",
     "licenses": "0.0.x",
     "mana": "0.1.x",
