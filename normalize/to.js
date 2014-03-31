@@ -22,6 +22,32 @@ exports.type = function type(of) {
 };
 
 /**
+ * Decide the best way of merging license data.
+ *
+ * @param {Mixed} data
+ * @param {Mixed} fallback
+ * @returns {Mixed} The one that should be merged.
+ */
+exports.licenses = function licenses(data, fallback) {
+  var fblicenses = fallback.licenses
+    , dlicenses = data.licenses
+    , fbok, dok;
+
+  fbok = Array.isArray(fblicenses) && fblicenses.every(function every(license) {
+    return 'string' === exports.type(license);
+  });
+
+  dok = Array.isArray(dlicenses) && dlicenses.every(function every(license) {
+    return 'string' === exports.type(license);
+  });
+
+  if (dok && !fbok) return dlicenses;
+  if (fbok && !dok) return fblicenses;
+
+  return dlicenses || fblicenses;
+};
+
+/**
  * Create a gravatar for the given email.
  *
  * @param {Object} data Object that has an `email` property.
