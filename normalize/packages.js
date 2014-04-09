@@ -52,7 +52,7 @@ function packages(data, fallback) {
   // first.
   //
   data._id = data.name = data.name || data._id || fallback.name || fallback._id;
-  data.license = fallback.license || data.license;
+  data.license = data.license || fallback.license;
   data.licenses = to.licenses(data, fallback);
   data.github = extract(data);
   data.releases = releases;
@@ -81,7 +81,7 @@ function packages(data, fallback) {
   ].forEach(function each(transform) {
     var key = transform.key;
 
-    data[key] = fallback[key] || data[key] || transform.value;
+    data[key] = data[key] || fallback[key] || transform.value;
 
     //
     // If there's an additional data transformer run that over the structure.
