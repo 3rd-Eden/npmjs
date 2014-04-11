@@ -4,7 +4,7 @@
   "description": "An high available npm registry client",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha $(find test -name '*.test.js')"
   },
   "repository": {
     "type": "git",
@@ -33,5 +33,9 @@
     "licenses": "0.0.x",
     "mana": "0.1.x",
     "semver": "2.2.x"
+  },
+  "devDependencies": {
+    "chai": "1.9.x",
+    "mocha": "1.18.x"
   }
 }
