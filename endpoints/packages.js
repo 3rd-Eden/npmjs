@@ -109,7 +109,17 @@ Packages.prototype.releases = function releases(name, fn) {
       if (key in data.versions) return; // Prevent duplicates
 
       var version = data['dist-tags'][key]
-        , release = api.merge({}, data.versions[version]);
+        , release;
+
+      //
+      // It's possible that the tag does not exist in the versions object. This
+      // is some odd npm edge case.
+      //
+      // Lesson learned: Never trust npm data structures.
+      //
+      if (!version || !(version in data.versions)) return;
+
+      release = api.merge({}, data.versions[version]);
 
       //
       // The JSON.parse(JSON.stringify)) is needed to create a full clone of the
