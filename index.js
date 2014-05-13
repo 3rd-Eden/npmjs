@@ -102,6 +102,7 @@ Registry.mirrors = {
   strongloop:   'http://npm.strongloop.com/',
   npmjsau:      'http://registry.npmjs.org.au/',
   npmjseu:      'http://registry.npmjs.eu/',
+  npmjspt:      'http://registry.npmjs.pt/',
   npmjs:        'http://registry.npmjs.org/',
   cnpmjs:       'http://registry.cnpmjs.org/'
 };
