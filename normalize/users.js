@@ -1,6 +1,7 @@
 'use strict';
 
-var to = require('./to');
+var extract = require('extract-github')
+  , to = require('./to');
 
 /**
  * Normalize user profile information.
@@ -18,14 +19,10 @@ function users(data) {
   // sure that WE decided on the our internal structure, not the users.
   //
   if (data.github) {
-    var github = /github\.com\/([^\/]+)\/?/gi;
-
     if ('string' !== typeof data.github) {
       delete data.github;
-    } else if (github.test(data.github)) {
-      data.github = github.exec(data.github)[1];
     } else {
-      data.github = data.github.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
+      data.github = (extract(data.github) || {}).user;
     }
 
     //

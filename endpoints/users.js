@@ -140,7 +140,7 @@ Users.prototype.starred = function starred(name, fn) {
 Users.prototype.get = function get(username, fn) {
   username = '/-/user/org.couchdb.user:'+ encodeURIComponent(username);
 
-  return this.send(name, fn).map(normalize.users);
+  return this.send(username, fn).map(normalize.users);
 };
 
 /**
