@@ -39,6 +39,7 @@ var Registry = mana.extend({
     });
 
     options.registry = 'registry' in options ? options.registry : Registry.mirrors.nodejitsu;
+    options.stats = 'stats' in options ? options.stats : 'https://api.npmjs.org/';
     options.mirrors = 'mirrors' in options ? options.mirrors : mirrors;
     options.maxdelay = 'maxdelay' in options ? options.maxdelay : 60000;
     options.mindelay = 'mindelay' in options ? options.mindelay : 100;
@@ -57,6 +58,7 @@ var Registry = mana.extend({
     this.mirrors = options.mirrors;
     this.mindelay = options.mindelay;
     this.maxdelay = options.maxdelay;
+    this.statservice = options.stats;
     this.githulk = options.githulk;
     this.retries = options.retries;
     this.factor = options.factor;

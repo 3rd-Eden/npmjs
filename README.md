@@ -44,7 +44,7 @@ As seen in the example above, the `Registry` constructor allows an `Object` with
 options to customize the npm registry client. The following options are supported:
 
 - `registry` The URL of the npm registry. Defaults to Nodejitsu's mirror.
-- `logs` URL of the download logs service. Defaults to npm's API server.
+- `stats` URL of the download stats service. Defaults to npm's API server.
 - `mirrors` Array of mirrors to use when a registry is down.
 - `maxdelay` Maximum delay for exponential back off.
 - `mindelay` Minimum delay for exponential back off.
