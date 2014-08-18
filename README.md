@@ -73,13 +73,82 @@ The following endpoints are available:
 The `.packages` endpoints allows you to retrieve detailed information about npm
 packages. The following methods are implemented:
 
-- `npm.packages.get`: Basic module information.
-- `npm.packages.depended`: List modules that depend on the given module.
-- `npm.packages.starred`: List users who starred the module.
-- `npm.packages.keyword`: List packages who use this keyword.
-- `npm.packages.releases`: All releases for a module.
-- `npm.packages.release`: The latest release.
-- `npm.packages.details`: Highly detailed information about the package.
+#### npm.packages.get
+
+Get information from the npm package. If the name contains an `@` char we assume
+that the user wants to get a specific version instead.
+
+Example: **primus@0.1.1 would retrieve primus version 0.1.1**
+
+```js
+npm.packages.get('primus', function (err, data) {
+
+});
+```
+
+#### npm.packages.details
+ 
+Retrieve additional details for the package information. This a lot slower than
+a simple `.get` but much more detailed and accurate as it uses custom parsers
+for accurate licensing information. Which could require a fair amount of npm and
+github lookups.
+
+```js
+npm.packages.details('memcached', function (err, data) {
+
+});
+```
+
+#### npm.packages.depended
+
+Get all packages that are depended upon a given package name.
+
+```js
+npm.packages.depended('eventemitter3', function (err, depended) {
+
+});
+```
+
+#### npm.packages.starred
+
+Find out which users have starred the given package.
+
+```js
+npm.packages.starred('npm-registry', function (err, starred) {
+
+});
+```
+
+#### npm.packages.keyword
+ 
+Find all packages that matches the giving keywords.
+
+```js
+npm.packages.keyword('primus');
+```
+ 
+#### npm.packages.releases
+
+Retrieve all release specific information for the given package name. Please
+note that this uses the `npm.packages.details` call under the hood to provide
+more detailed information but it will therefor also take longer.
+
+```js
+npm.packages.releases('bigpipe', function (err, releases) {
+
+});
+```
+
+#### npm.packages.release
+
+Get a specific release of a package. Please note that this uses the
+`npm.packages.details` call under the hood to provide more detailed information
+but it will therefor also take longer.
+
+```js
+npm.packages.release('npm-registry', '0.0.2', function (err, release) {
+});
+```
 
 ### Users
 
