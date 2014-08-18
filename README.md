@@ -160,7 +160,7 @@ npm.packages.release('npm-registry', '0.0.2', function (err, release) {
 });
 ```
 
-### npm.packages.range
+#### npm.packages.range
 
 Get a release that is satisfying a given semver range. Please note that this
 uses the `npm.packages.details` call under the hood to provide more detailed
@@ -177,10 +177,128 @@ npm.packages.release('npm-registry', '^0.1.2', function (err, release) {
 The `.users` endpoint allows you to retrieve detailed information about a given
 npm account. The following methods are implemented:
 
+- [npm.users.add](#npmusersadd)
+- [npm.users.create](#npmuserscreate)
+- [npm.users.update](#npmusersupdate)
+- [npm.users.list](#npmuserslist)
+- [npm.users.starred](#npmusersstarred)
+- [npm.users.get](#npmusersget)
+- [npm.users.sync](#npmuserssync)
 
-- `npm.users.list`: All packages released by the user.
-- `npm.users.starred`: Packages that the user has starred.
-- `npm.users.get`: Get the profile information.
+#### npm.users.add
+
+Add a user as maintainer of a package.
+
+```js
+npm.users.add('foobar', 'npm-registry', function (err) {
+
+});
+```
+
+#### npm.users.create
+
+Create a new npm account.
+
+```js
+npm.users.create('foobar', 'foo@bar.com', 'secretpassword', function (err) {
+
+});
+```
+
+#### npm.users.update
+
+Update the users.
+
+```js
+npm.users.update('foobar', {
+  twitter: 'foobar',
+  email: 'foo@foobar.bar'
+}, function (err) {
+
+});
+```
+
+#### npm.users.list
+
+List all packages that the user maintains.
+
+```js
+npm.users.list('foobar', function (err, modules) {
+
+});
+```
+
+#### npm.users.starred
+
+Get all packages that the user has starred.
+
+```js
+npm.users.starred('foobar', function (err, modules) {
+  
+});
+```
+
+#### npm.users.get
+
+Get profile information for a given user.
+
+```js
+npm.users.get('foobar', function (err) {
+
+});
+```
+
+#### npm.users.sync
+
+Sync ownership of npm modules with another account. This is useful if you have
+one base owner of modules like a corporate account and you want to on-board a
+new user.
+
+```js
+npm.users.sync('source-account', 'foobar', function (err) {
+
+});
+```
+
+### Downloads
+
+The `.downloads` endpoint allows you to retrieve download stats for a given
+package. The following methods are implemented:
+
+- [npm.downloads.totals](#npmdownloadstotals)
+- [npm.downloads.range](#npmdownloadsrange)
+
+#### npm.downloads.totals
+ 
+Get the total amount of downloads for a given period. If no package name has
+been supplied the total of all packages will be returned. The following date ranges
+are accepted by the stats server.
+
+- All packages, last day:
+- last day: `last-day`
+- specific date: `2014-02-01`
+- last week: `last-week
+- range of date (30 days max): `2014-02-01:2014-02-08`
+- last month: `last-month`A
+- specific month: `2014-01-01:2014-01-31`
+
+```js
+npm.downloads.totals('last-week', 'npm-registry', function (err, stats) {
+
+});
+```
+
+#### npm.downloads.range
+
+Same as above, but it doesn't get the total/summary of the downloads but an array
+with the downloads per day. The same date ranges are allowed and if no package name
+is supplied, all packages is assumed. 
+
+```js
+npm.downloads.range('last-week', 'npm-registry', function (err, stats) {
+
+});
+```
 
 ## Normalization
 
