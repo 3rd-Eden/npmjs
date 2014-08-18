@@ -73,6 +73,15 @@ The following endpoints are available:
 The `.packages` endpoints allows you to retrieve detailed information about npm
 packages. The following methods are implemented:
 
+- [npm.packages.get](#npmpackagesget)
+- [npm.packages.details](#npmpackagesdetails)
+- [npm.packages.depended](#npmpackagesdepended)
+- [npm.packages.starred](#npmpackagesstarred)
+- [npm.packages.keyword](#npmpackageskeyword)
+- [npm.packages.releases](#npmpackagesreleases)
+- [npm.packages.release](#npmpackagesrelease)
+- [npm.packages.range](#npmpackagesrange)
+
 #### npm.packages.get
 
 Get information from the npm package. If the name contains an `@` char we assume
@@ -147,6 +156,19 @@ but it will therefor also take longer.
 
 ```js
 npm.packages.release('npm-registry', '0.0.2', function (err, release) {
+
+});
+```
+
+### npm.packages.range
+
+Get a release that is satisfying a given semver range. Please note that this
+uses the `npm.packages.details` call under the hood to provide more detailed
+information but it will therefor also take longer.
+
+```js
+npm.packages.release('npm-registry', '^0.1.2', function (err, release) {
+
 });
 ```
 
