@@ -27,6 +27,47 @@ And that is all you need to type in your terminal in order to prevent becoming
 terminal. The `--save` tells `npm` to automatically add the package and latest
 version to your `package.json`.
 
+## Getting started
+
+Now that you've installed the `npm-registry` module you can require and
+initialize it using:
+
+```js
+'use strict';
+
+var Registry = require('npm-registry');
+
+var npm = new Registry({ options });
+```
+
+As seen in the example above, the `Registry` constructor allows an `Object` with
+options to customize the npm registry client. The following options are supported:
+
+- `registry` The URL of the npm registry. Defaults to Nodejitsu's mirror.
+- `logs` URL of the download logs service. Defaults to npm's API server.
+- `mirrors` Array of mirrors to use when a registry is down.
+- `maxdelay` Maximum delay for exponential back off.
+- `mindelay` Minimum delay for exponential back off.
+- `githulk` Reference to a pre-configured [GitHulk] instance.
+- `retries` The amount of retries we should do before giving up.
+- `factor` Exponential backoff factor.
+- `authorization` Optional authorization header for authorized requests.
+- `user,password` Optional user/password for authorized requests.
+
+The fully configured npm registry client can then be used to access the various
+of API endpoints using:
+
+```js
+//
+// npm.<endpoint>.<method>(<arg>, <callback>);
+//
+npm.packages.get('npm-registry', function (err, data) {
+  ..
+});
+```
+
+The following endpoints are available:
+
 ### Packages
 
 The `.packages` endpoints allows you to retrieve detailed information about npm
@@ -52,12 +93,11 @@ npm account. The following methods are implemented:
 
 ## Normalization
 
-As the internal data structure is do damn awkward in npm we need to normalize the
-data structures before we can even try to use it. While this normalization is
-part automatically done for you internally there might be use cases where you
-want to manually normalize a given dataset.
-
-The normalize module can be required directly using:
+As the internal data structure is do damn awkward and unmaintained in npm we
+need to normalize the data structures before we can even try to use it. While
+this normalization is part automatically done for you internally there might be
+use cases where you want to manually normalize a given dataset. The normalize
+module can be required directly using:
 
 ```js
 var normalize = require('npmjs/normalize');
@@ -77,3 +117,4 @@ data = normalize.packages(data);
 MIT
 
 [mana]: http://github.com/3rd-Eden/mana
+[Githulk]: http://github.com/3rd-Eden/githulk
