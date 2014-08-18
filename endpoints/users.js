@@ -112,7 +112,9 @@ Users.prototype.update = function update(username, fields, fn) {
 Users.prototype.list = function list(name, fn) {
   return this.view('browseAuthors', {
     key: name
-  }, fn).map(this.api.map.simple);
+  }, fn)
+  .map(this.api.map.simple)
+  .filter(Boolean);
 };
 
 /**
@@ -126,7 +128,9 @@ Users.prototype.list = function list(name, fn) {
 Users.prototype.starred = function starred(name, fn) {
   return this.view('browseStarUser', {
     key: name
-  }, fn).map(this.api.map.simple);
+  }, fn)
+  .map(this.api.map.simple)
+  .filter(Boolean);
 };
 
 /**

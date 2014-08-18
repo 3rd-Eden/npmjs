@@ -86,10 +86,10 @@ var Registry = mana.extend({
    */
   map: {
     simple: function simple(data) {
-      return {
+      return data ? {
         name: data[1],
         description: data[2]
-      };
+      } : undefined;
     }
   }
 });

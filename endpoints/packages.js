@@ -46,7 +46,9 @@ Packages.prototype.get = function get(name, fn) {
 Packages.prototype.depended = function depended(name, fn) {
   return this.view('dependedUpon', {
     key: name
-  }, fn).map(this.api.map.simple);
+  }, fn)
+  .map(this.api.map.simple)
+  .filter(Boolean);
 };
 
 /**
@@ -76,7 +78,9 @@ Packages.prototype.starred = function starred(name, fn) {
 Packages.prototype.keyword = function keyword(name, fn) {
   return this.view('byKeyword', {
     key: name
-  }, fn).map(this.api.map.simple);
+  }, fn)
+  .map(this.api.map.simple)
+  .filter(Boolean);
 };
 
 /**
