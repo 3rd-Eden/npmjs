@@ -24,7 +24,7 @@ function Packages(api) {
  * assume that the user wants to get a specific version instead.
  * Example:
  *
- * - primus@0.1.1 would retreive primus version 0.1.1
+ * - primus@0.1.1 would retrieve primus version 0.1.1
  *
  * @param {String} name The name of the node module.
  * @param {Function} fn The callback.

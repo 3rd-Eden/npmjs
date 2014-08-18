@@ -38,6 +38,7 @@ Users.prototype.add = function add(name, pkg, fn) {
  * @param {String} email Accounts email.
  * @param {String} password Account password.
  * @param {Function} fn Callback.
+ * @returns {Assign}
  * @api public
  */
 Users.prototype.create = function create(username, email, password, fn) {
@@ -73,7 +74,9 @@ Users.prototype.create = function create(username, email, password, fn) {
  *
  * @param {String} username The user's name.
  * @param {Object} fields The fields we want to add.
- * @param {Function} fn
+ * @param {Function} fn Completion callback.
+ * @returns {Assign}
+ * @api public
  */
 Users.prototype.update = function update(username, fields, fn) {
   username = '/-/user/org.couchdb.user:'+ encodeURIComponent(username);
@@ -155,6 +158,7 @@ Users.prototype.get = function get(username, fn) {
  * @param {String} source The user's packages that needs to be synced.
  * @param {String} target The user who needs to have ownership.
  * @param {Object} options Configuration of the sync process.
+ * @returns {Assign}
  * @api public
  */
 Users.prototype.sync = function sync(source, target, options, fn) {
