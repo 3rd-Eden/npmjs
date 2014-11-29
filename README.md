@@ -309,7 +309,7 @@ use cases where you want to manually normalize a given dataset. The normalize
 module can be required directly using:
 
 ```js
-var normalize = require('npmjs/normalize');
+var normalize = require('npm-registry/normalize');
 ```
 
 The `normalize` variable now contains two different functions, `users` and
