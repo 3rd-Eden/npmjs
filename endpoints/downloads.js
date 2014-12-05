@@ -28,9 +28,16 @@ Downloads.prototype.totals = function point(period, pkg, fn) {
     pkg = null;
   }
 
+  process.nextTick(function () {
+    fn(null, {
+      downloads: [],
+      package: pkg
+    });
+  });
+
   return this.send(['downloads', 'point', period, pkg], {
     api: this.api.statservice
-  }, fn).map(function map(data) {
+  }, function () { }).map(function map(data) {
     //
     // There is this annoying edge-case in the npm downloads API where they do
     // not return the correct information for newly published packages. These
