@@ -63,6 +63,7 @@ var Registry = mana.extend({
     this.retries = options.retries;
     this.factor = options.factor;
     this.api = options.registry;
+    this.proxy = options.proxy;
 
     //
     // Pre-compile the basic authorization so we can do updates and deletes
