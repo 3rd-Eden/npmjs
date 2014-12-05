@@ -36,7 +36,8 @@ Downloads.prototype.totals = function point(period, pkg, fn) {
   });
 
   return this.send(['downloads', 'point', period, pkg], {
-    api: this.api.statservice
+    api: this.api.statservice,
+    proxy: process.env.http_proxy
   }, function () { }).map(function map(data) {
     //
     // There is this annoying edge-case in the npm downloads API where they do
@@ -69,7 +70,8 @@ Downloads.prototype.range = function ranged(period, pkg, fn) {
   }
 
   return this.send(['downloads', 'range', period, pkg], {
-    api: this.api.statservice
+    api: this.api.statservice,
+    proxy: process.env.http_proxy
   }, fn);
 };
 
