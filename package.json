@@ -28,15 +28,15 @@
   },
   "homepage": "https://github.com/3rd-Eden/npmjs",
   "dependencies": {
-    "debug": "0.8.x",
-    "extract-github": "0.0.x",
+    "debug": "~2.3.2",
+    "extract-github": "~1.0.0",
     "licenses": "0.0.x",
     "mana": "0.1.x",
-    "semver": "2.2.x"
+    "semver": "~5.3.0"
   },
   "devDependencies": {
-    "chai": "1.9.x",
-    "mocha": "1.18.x",
-    "pre-commit": "0.0.x"
+    "chai": "~3.5.0",
+    "mocha": "~3.1.2",
+    "pre-commit": "~1.1.3"
   }
 }
