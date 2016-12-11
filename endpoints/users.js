@@ -125,15 +125,27 @@ Users.prototype.list = function list(name, fn) {
  *
  * @param {String} name The user's name
  * @param {Function} fn The callback.
- * @returns {Assign}
+ * @returns {Array}
  * @api public
  */
 Users.prototype.starred = function starred(name, fn) {
-  return this.view('browseStarUser', {
-    key: name
-  }, fn)
-  .map(this.api.map.simple)
-  .filter(Boolean);
+  var starredPackages = '-/_view/starredByUser?key="'+ encodeURIComponent(name) + '"';
+  var objs = [];
+  return this.send(starredPackages, function(err, data){
+    if(err) {
+      debug('failed to obtain starred packages: %s', err.message);
+      return fn(err);
+    }
+    var starredPackages = [];
+    if (data === undefined || data.length <=0 || data[0].rows === undefined) {
+      debug('failed to obtain starred packages');
+      return fn(new Error('failed to obtain starred packages'));
+    }
+    data[0].rows.forEach(function(item) {
+      starredPackages.push(item.value);
+    });
+    return fn(null, starredPackages);
+  });
 };
 
 /**
