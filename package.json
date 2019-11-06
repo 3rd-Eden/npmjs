@@ -32,7 +32,7 @@
     "extract-github": "0.0.x",
     "licenses": "0.0.x",
     "mana": "0.1.x",
-    "semver": "2.2.x"
+    "semver": "6.3.x"
   },
   "devDependencies": {
     "chai": "1.9.x",
