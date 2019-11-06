@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/3rd-Eden/npmjs",
   "dependencies": {
-    "debug": "0.8.x",
+    "debug": "4.1.x",
     "extract-github": "0.0.x",
     "licenses": "0.0.x",
     "mana": "0.1.x",
